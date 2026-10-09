@@ -1,0 +1,939 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#1c2b39">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Ladekosten">
+<title>Ladekosten</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🔌</text></svg>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#eef2f5; --panel:#ffffff; --ink:#1c2b39; --muted:#66788a; --line:#d5dee6; --track:#dde5ec;
+  --summer:#8fd400; --winter:#c9ec7a; --off:#e2efc4; --grid:#5d7184; --warn:#b3261e;
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --bg:#131d27; --panel:#1b2835; --ink:#e6edf3; --muted:#93a4b5; --line:#2c3c4c; --track:#243443;
+    --summer:#a8e62e; --winter:#6a9a1c; --off:#2d3d1c; --grid:#7f95aa; --warn:#ff8a80;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#131d27; --panel:#1b2835; --ink:#e6edf3; --muted:#93a4b5; --line:#2c3c4c; --track:#243443;
+  --summer:#a8e62e; --winter:#6a9a1c; --off:#2d3d1c; --grid:#7f95aa; --warn:#ff8a80;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 "Barlow",system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased}
+.num{font-family:"Barlow Semi Condensed","Barlow",system-ui,sans-serif;font-variant-numeric:tabular-nums}
+main{max-width:560px;margin:0 auto;padding:18px 16px 40px}
+h1,h2{margin:0;font-weight:600}
+h2{font-size:1.05rem;margin-bottom:10px}
+button,input,select{font:inherit;color:inherit}
+button{cursor:pointer}
+:focus-visible{outline:2px solid var(--summer);outline-offset:2px}
+
+/* 24-Stunden-Ring */
+.day{display:flex;flex-direction:column;align-items:center;padding:6px 0 22px}
+.dial{position:relative;width:min(270px,78vw);aspect-ratio:1}
+.dial svg{display:block;width:100%;height:100%}
+.dial .center{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;text-align:center;pointer-events:none}
+.dial .time{font-size:2.35rem;font-weight:600;line-height:1;letter-spacing:-.01em}
+.dial h1{font-size:.95rem;font-weight:600;margin-top:4px}
+.dial .count{font-size:.78rem;color:var(--muted);margin-top:2px}
+.dial .knob{transition:transform .6s ease}
+.tariff-line{margin-top:12px;color:var(--muted);text-align:center;max-width:34ch}
+.tariff-line strong{color:var(--ink);font-weight:600}
+
+.live{display:grid;grid-template-columns:1fr 1fr;gap:1px;background:var(--line);border:1px solid var(--line);border-radius:12px;overflow:hidden;margin-bottom:26px}
+.live>div{background:var(--panel);padding:12px 14px;position:relative;overflow:hidden}
+.live .k,.live .v{position:relative;z-index:1}
+
+/* Wellen im Status-Feld */
+.wave{position:absolute;left:0;right:0;bottom:0;height:0;pointer-events:none;transition:height .8s ease}
+.wave::before,.wave::after{content:"";position:absolute;left:0;bottom:0;width:calc(100% + 120px);height:100%;background:var(--summer);
+  -webkit-mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' preserveAspectRatio='none'%3E%3Cpath d='M0 10 C30 0 30 0 60 10 S90 20 120 10 V40 H0Z'/%3E%3C/svg%3E") repeat-x 0 0/120px 100%;
+          mask:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='120' height='40' preserveAspectRatio='none'%3E%3Cpath d='M0 10 C30 0 30 0 60 10 S90 20 120 10 V40 H0Z'/%3E%3C/svg%3E") repeat-x 0 0/120px 100%}
+.wave::after{opacity:0}
+@keyframes waveMove{from{transform:translateX(-120px)}to{transform:translateX(0)}}
+@keyframes waveBob{0%,100%{transform:translateX(-120px) translateY(0)}50%{transform:translateX(-60px) translateY(3px)}}
+/* angesteckt: flach, langsam, zart */
+.status-plugged .wave{height:24%}
+.status-plugged .wave::before{opacity:.28;animation:waveBob 7s ease-in-out infinite}
+/* lädt: höher, schneller, zwei Lagen */
+.status-charging .wave{height:62%}
+.status-charging .wave::before{opacity:.55;animation:waveMove 2.4s linear infinite}
+.status-charging .wave::after{opacity:.3;animation:waveMove 3.8s linear infinite reverse;height:85%}
+@media (prefers-reduced-motion:reduce){.wave::before,.wave::after{animation:none!important}}
+.live .k{font-size:.8rem;color:var(--muted)}
+.live .v{font-size:1.45rem;font-weight:600;line-height:1.2}
+.live .wide{grid-column:1/-1}
+.live .v small{display:block;font-size:.85rem;font-weight:400;color:var(--muted)}
+
+/* Leistungsanzeige */
+.gauge{position:relative;z-index:1;max-width:170px;margin:4px auto 0}
+.gauge svg{display:block;width:100%;height:auto;overflow:visible}
+.gauge .trk{stroke:var(--track)}
+.gauge .val{transition:stroke-dasharray .9s cubic-bezier(.3,.7,.3,1),stroke .9s}
+.gauge .read{position:absolute;left:0;right:0;bottom:2px;text-align:center;line-height:1}
+.gauge .read .v{font-size:1.45rem}
+.gauge .read .of{font-size:.72rem;color:var(--muted);margin-top:2px}
+.spark{display:block;width:100%;height:26px;margin-top:6px;position:relative;z-index:1}
+.spark polyline{transition:stroke .9s}
+.live-dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--muted);margin-left:6px;vertical-align:1px;opacity:.5}
+.live-dot.on{background:var(--summer);opacity:1;animation:blink 1.6s ease-in-out infinite}
+@keyframes blink{50%{opacity:.25}}
+@media (prefers-reduced-motion:reduce){.live-dot.on{animation:none}}
+.msg{padding:12px 14px;border-radius:12px;margin-bottom:20px;background:var(--panel);border-left:4px solid var(--warn)}
+.msg.info{border-left-color:var(--summer)}
+.msg button{margin-top:8px}
+
+/* Laden & Ladeplan */
+.charge{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:26px}
+.charge .why{font-size:.9rem;color:var(--muted);margin:2px 0 12px}
+.charge .why strong{color:var(--ink);font-weight:600}
+.bigbtn{width:100%;border:0;border-radius:12px;padding:14px;font-weight:600;font-size:1.05rem;background:var(--summer);color:#16240a}
+.bigbtn.back{background:var(--ink);color:var(--bg)}
+.bigbtn:disabled{opacity:.45;cursor:default}
+.banner{margin-top:10px;font-size:.88rem;padding:10px 12px;border-radius:10px;background:var(--off)}
+.plan{margin-top:16px;border-top:1px solid var(--line);padding-top:12px}
+.plan h3{margin:0 0 8px;font-size:1rem;font-weight:600}
+.prow{display:grid;grid-template-columns:44px 3.6em minmax(0,1fr) minmax(0,1fr);grid-template-areas:"sw lbl b e";align-items:center;gap:8px;padding:8px 0;border-top:1px solid var(--line)}
+.prow:first-child{border-top:0}
+.prow .sw{grid-area:sw}.prow .lbl{grid-area:lbl}.prow .b{grid-area:b}.prow .e{grid-area:e}
+.prow .lbl{font-weight:500;white-space:nowrap}
+.prow input[type=time]{-webkit-appearance:none;appearance:none;display:block;box-sizing:border-box;width:100%;min-width:0;max-width:100%;height:40px;padding:0 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font:inherit;font-size:16px;color:inherit;text-align:center}
+.prow input[type=time]::-webkit-date-and-time-value{text-align:center;margin:0}
+.prow input[type=time]::-webkit-calendar-picker-indicator{margin:0 0 0 4px}
+@media (max-width:419px){
+  .prow{grid-template-columns:44px minmax(0,1fr) minmax(0,1fr);grid-template-areas:"sw lbl lbl" ". b e";row-gap:6px}
+}
+.prow input[type=time]:disabled{opacity:.4}
+.sw{position:relative;width:44px;height:26px;flex:none}
+.sw input{opacity:0;width:0;height:0;position:absolute}
+.sw span{position:absolute;inset:0;border-radius:13px;background:var(--track);transition:background .2s}
+.sw span::after{content:"";position:absolute;left:3px;top:3px;width:20px;height:20px;border-radius:50%;background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.25);transition:transform .2s}
+.sw input:checked+span{background:var(--summer)}
+.sw input:checked+span::after{transform:translateX(18px)}
+.sw input:focus-visible+span{outline:2px solid var(--summer);outline-offset:2px}
+.plan .actions{margin-top:10px}
+.plan .out{font-size:.88rem;color:var(--muted);margin-top:8px;min-height:1.2em}
+.confirm p{margin:0 0 12px}
+
+.period{display:flex;align-items:center;gap:8px;margin-bottom:6px}
+.period select{appearance:none;-webkit-appearance:none;border:1px solid var(--line);background:var(--panel) url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%2366788a' stroke-width='2'/%3E%3C/svg%3E") no-repeat right 12px center;border-radius:8px;padding:7px 34px 7px 12px;font-weight:500}
+.period .nav{margin-left:auto;display:flex;align-items:center;gap:6px}
+.period .nav button{background:none;border:1px solid var(--line);border-radius:8px;width:36px;height:36px}
+.period h2{margin:0;font-size:1rem;white-space:nowrap;text-align:center;min-width:6.5em}
+.total{font-size:3rem;font-weight:700;line-height:1;margin:10px 0 4px}
+.sub{color:var(--muted);margin-bottom:14px}
+.split{display:flex;height:10px;border-radius:5px;background:var(--grid);overflow:hidden;margin-bottom:6px}
+.split i{display:block;height:100%}
+.legend{display:flex;flex-wrap:wrap;gap:6px 16px;font-size:.85rem;color:var(--muted);margin-bottom:18px}
+.legend b,.dot{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:6px;vertical-align:-1px}
+
+.bars-wrap{overflow-x:auto}
+.bars{display:flex;align-items:flex-end;gap:3px;height:110px;min-width:100%;border-bottom:1px solid var(--line)}
+.bars .b{flex:1 0 7px;display:flex;flex-direction:column-reverse;height:100%}
+.bars .b i{display:block}
+.bars-x{display:flex;justify-content:space-between;font-size:.75rem;color:var(--muted);margin:4px 0 22px}
+
+details.more{background:var(--panel);border:1px solid var(--line);border-radius:12px;margin-bottom:28px}
+details.more summary{cursor:pointer;padding:12px 14px;font-weight:600;list-style:none;display:flex;justify-content:space-between;align-items:center}
+details.more summary::-webkit-details-marker{display:none}
+details.more summary::after{content:"";width:8px;height:8px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details.more[open] summary::after{transform:rotate(-135deg)}
+.tar{display:grid;grid-template-columns:1fr auto;gap:2px 12px;padding:12px 14px;border-top:1px solid var(--line)}
+.tar .name{font-weight:600}
+.tar .cost{font-weight:600;font-size:1.15rem;text-align:right}
+.tar .meta{grid-column:1/-1;font-size:.88rem;color:var(--muted)}
+.tar.sum{background:var(--bg)}
+.more .foot{padding:10px 14px 14px;font-size:.82rem;color:var(--muted);border-top:1px solid var(--line)}
+
+.sessions{list-style:none;margin:0 0 28px;padding:0;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.sessions li{display:flex;justify-content:space-between;gap:10px;padding:11px 14px;border-top:1px solid var(--line)}
+.sessions li:first-child{border-top:0}
+.sessions .when{font-weight:500}
+.sessions .meta{font-size:.85rem;color:var(--muted)}
+.sessions .cost{text-align:right;font-weight:600;font-size:1.1rem;white-space:nowrap}
+.empty{color:var(--muted)}
+
+.actions{display:flex;flex-wrap:wrap;gap:10px}
+.btn{border:1px solid var(--line);background:var(--panel);border-radius:10px;padding:10px 14px}
+.btn.primary{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.btn.danger{color:var(--warn)}
+.note{font-size:.82rem;color:var(--muted);margin-top:18px}
+
+dialog{border:0;border-radius:16px;padding:0;width:min(520px,calc(100% - 24px));max-height:calc(100% - 24px);background:var(--panel);color:var(--ink)}
+dialog::backdrop{background:rgba(10,20,30,.5)}
+.dlg{padding:20px}
+.dlg h2{font-size:1.25rem;margin-bottom:14px}
+fieldset{border:0;padding:0;margin:0 0 18px}
+legend{font-weight:600;margin-bottom:8px;padding:0}
+legend b{display:inline-block;width:12px;height:12px;border-radius:3px;margin-right:8px;vertical-align:-1px}
+.hint{font-size:.82rem;color:var(--muted);margin:-4px 0 10px}
+label{display:block;font-size:.88rem;color:var(--muted);margin-bottom:10px}
+label input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px solid var(--line);border-radius:8px;background:var(--bg);font-size:1rem}
+.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.test{font-size:.9rem;margin:8px 0 4px;min-height:1.3em}
+@media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<main>
+  <section class="day" aria-label="Tarif heute">
+    <div class="dial">
+      <svg id="dial" viewBox="0 0 240 240" role="img" aria-label="24-Stunden-Uhr mit günstigem Zeitfenster"></svg>
+      <div class="center">
+        <div class="time num" id="clock"></div>
+        <h1 id="tariffNow">Normaltarif</h1>
+        <div class="count num" id="countdown"></div>
+      </div>
+    </div>
+    <div class="tariff-line" id="tariffLine"></div>
+  </section>
+
+  <div id="msg"></div>
+
+  <section class="live" aria-label="Wallbox live">
+    <div id="statusCell"><div class="wave" aria-hidden="true"></div><div class="k">Status</div><div class="v" id="carState">–</div></div>
+    <div><div class="k">Leistung<span class="live-dot" id="liveDot" title="Live-Aktualisierung"></span></div>
+      <div class="gauge">
+        <svg viewBox="0 0 120 66" aria-hidden="true">
+          <path class="trk" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke-width="10" stroke-linecap="round"/>
+          <path class="val" id="gaugeVal" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+        </svg>
+        <div class="read"><div class="v num" id="power">–</div><div class="of num">von 11 kW</div></div>
+      </div>
+      <svg class="spark" id="spark" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true"><polyline id="sparkLine" fill="none" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke" points=""/></svg>
+    </div>
+    <div class="wide"><div class="k">Aktuelle Ladung</div><div class="v num" id="curSession">Kein Auto angesteckt</div></div>
+  </section>
+
+  <section class="charge" aria-label="Laden steuern">
+    <h2>Laden</h2>
+    <div class="why" id="why">Verbinde die Wallbox in den Einstellungen, um das Laden zu steuern.</div>
+    <button class="bigbtn" id="chargeBtn" disabled>Jetzt laden</button>
+    <div id="manualBanner"></div>
+
+    <div class="plan">
+      <h3>Ladeplan</h3>
+      <div class="why" style="margin-bottom:6px">Ist ein Tag aktiv, lädt die Wallbox an diesem Tag nur im eingestellten Zeitfenster. Ein inaktiver Tag bedeutet: Laden jederzeit erlaubt.</div>
+      <div id="planRows"></div>
+      <div class="actions">
+        <button class="btn primary" id="planSave" disabled>Ladeplan speichern</button>
+        <button class="btn" id="planSun">Sonnen-Zeiten übernehmen</button>
+      </div>
+      <div class="out" id="planOut"></div>
+    </div>
+  </section>
+
+  <section aria-label="Kostenübersicht">
+    <div class="period">
+      <select id="periodSel" aria-label="Zeitraum">
+        <option value="month">Monat</option>
+        <option value="year">Jahr</option>
+        <option value="all">Gesamt</option>
+      </select>
+      <div class="nav" id="nav">
+        <button id="prevP" aria-label="Zurück">‹</button>
+        <h2 id="periodTitle"></h2>
+        <button id="nextP" aria-label="Weiter">›</button>
+      </div>
+    </div>
+    <div class="total num" id="pCost">0,00 €</div>
+    <div class="sub num" id="pSub"></div>
+    <div class="split" id="pSplit"></div>
+    <div class="legend"><span><b style="background:var(--summer)"></b>Sommersonne</span><span><b style="background:var(--winter)"></b>Wintersonne</span><span><b style="background:var(--grid)"></b>Normaltarif</span></div>
+    <div class="bars-wrap"><div class="bars" id="bars"></div></div>
+    <div class="bars-x num" id="barsX"></div>
+
+    <details class="more" id="more">
+      <summary>Erweiterte Details</summary>
+      <div id="moreBody"></div>
+    </details>
+
+    <h2>Ladevorgänge</h2>
+    <ul class="sessions" id="sessions"></ul>
+  </section>
+
+  <div class="actions">
+    <button class="btn primary" id="openSettings">Einstellungen</button>
+    <button class="btn" id="refresh">Jetzt aktualisieren</button>
+    <button class="btn" id="exportCsv">CSV exportieren</button>
+  </div>
+  <p class="note">Ladebeginn, Ladeende und Energie kommen direkt von der Wallbox. Ist die Aufzeichnung im Hintergrund eingerichtet, schreibt Netlify die Wallbox alle 5 Minuten mit, auch wenn die App geschlossen ist. Beim nächsten Öffnen holt die App diese Messungen ab. Ohne Hintergrund-Aufzeichnung kennt die App bei mehreren Ladungen zwischen zwei Öffnungen den genauen Zeitpunkt der früheren Ladungen nicht und kennzeichnet sie mit „ohne App erfasst“.</p>
+</main>
+
+<dialog id="confirmDlg">
+  <form class="dlg confirm" method="dialog">
+    <h2>Außerhalb des Ladeplans laden?</h2>
+    <p id="confirmText"></p>
+    <p class="hint" style="margin:0 0 14px">Die Ladung läuft, bis du „Zurück zum Ladeplan“ tippst. Steckst du das Auto ab, stellt die App den Ladeplan wieder her, sobald sie das nächste Mal geöffnet ist.</p>
+    <div class="actions">
+      <button class="btn primary" value="yes">Ja, jetzt laden</button>
+      <button class="btn" value="no">Abbrechen</button>
+    </div>
+  </form>
+</dialog>
+
+<dialog id="settings">
+  <form class="dlg" method="dialog">
+    <h2>Einstellungen</h2>
+    <fieldset>
+      <legend>go-e Cloud-API</legend>
+      <label>Seriennummer<input id="fSerial" inputmode="numeric" autocomplete="off" placeholder="z.B. 123456"></label>
+      <label>API-Token<input id="fToken" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+      <button type="button" class="btn" id="testBtn">Verbindung testen</button>
+      <div class="test" id="testOut"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Aufzeichnung im Hintergrund</legend>
+      <p class="hint">Damit Netlify die Wallbox auch bei geschlossener App alle 5 Minuten mitschreibt. Denselben Schlüssel trägst du bei Netlify als APP_KEY ein.</p>
+      <label>App-Schlüssel<input id="fKey" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="leer = nicht aktiv"></label>
+      <div class="actions"><button type="button" class="btn" id="keyGen">Schlüssel erzeugen</button><button type="button" class="btn" id="keyTest">Hintergrund prüfen</button></div>
+      <div class="test" id="keyOut"></div>
+    </fieldset>
+    <fieldset>
+      <legend>Normaltarif</legend>
+      <label>Preis (ct/kWh, brutto)<input id="fNormal" type="text" inputmode="decimal" placeholder="z.B. 22,50"></label>
+    </fieldset>
+    <fieldset>
+      <legend><b style="background:var(--summer)"></b>Sommersonne</legend>
+      <label>Preis (ct/kWh, brutto)<input id="fSPrice" type="text" inputmode="decimal"></label>
+      <div class="row">
+        <label>Ab Monat<input id="fSMFrom" type="number" min="1" max="12"></label>
+        <label>Bis Monat<input id="fSMTo" type="number" min="1" max="12"></label>
+        <label>Ab Uhrzeit (Std.)<input id="fSHFrom" type="number" min="0" max="23"></label>
+        <label>Bis Uhrzeit (Std.)<input id="fSHTo" type="number" min="1" max="24"></label>
+      </div>
+    </fieldset>
+    <fieldset>
+      <legend><b style="background:var(--winter)"></b>Wintersonne</legend>
+      <p class="hint">Lass den Preis leer, wenn du keine Wintersonne hast.</p>
+      <label>Preis (ct/kWh, brutto)<input id="fWPrice" type="text" inputmode="decimal" placeholder="leer = nicht aktiv"></label>
+      <div class="row">
+        <label>Ab Monat<input id="fWMFrom" type="number" min="1" max="12"></label>
+        <label>Bis Monat<input id="fWMTo" type="number" min="1" max="12"></label>
+        <label>Ab Uhrzeit (Std.)<input id="fWHFrom" type="number" min="0" max="23"></label>
+        <label>Bis Uhrzeit (Std.)<input id="fWHTo" type="number" min="1" max="24"></label>
+      </div>
+    </fieldset>
+    <div class="actions">
+      <button class="btn primary" value="save">Speichern</button>
+      <button class="btn" value="cancel" formnovalidate>Abbrechen</button>
+      <button class="btn danger" type="button" id="resetBtn">Ladedaten löschen</button>
+    </div>
+  </form>
+</dialog>
+
+<script>
+const KEY='goe-ladekosten-v1';
+const DEF={settings:{serial:'',token:'',normal:null,
+  cheap:4.99,mFrom:4,mTo:9,hFrom:10,hTo:16,          /* Sommersonne */
+  wPrice:null,wMFrom:10,wMTo:3,wHFrom:10,wHTo:16},   /* Wintersonne */
+  last:null,days:{},sessions:[],cur:null,period:'month'};
+const clone=o=>JSON.parse(JSON.stringify(o));
+
+
+let S=load();
+let view=new Date(); view.setDate(1);
+let live=null, timer=null, lastErr='';
+
+function load(){
+  try{const r=localStorage.getItem(KEY); if(r){const o=JSON.parse(r); return {...clone(DEF),...o,settings:{...DEF.settings,...o.settings}};}}catch(e){}
+  return {...clone(DEF),v:2,archive:{}};
+}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
+
+const eur=new Intl.NumberFormat('de-AT',{style:'currency',currency:'EUR'});
+const n1=new Intl.NumberFormat('de-AT',{minimumFractionDigits:1,maximumFractionDigits:1});
+const n2=new Intl.NumberFormat('de-AT',{minimumFractionDigits:2,maximumFractionDigits:2});
+const pad=x=>String(x).padStart(2,'0');
+const dayKey=d=>`${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
+const $=id=>document.getElementById(id);
+const isNum=v=>typeof v==='number'&&!isNaN(v);
+const hasNormal=()=>isNum(S.settings.normal);
+const hasWinter=()=>isNum(S.settings.wPrice);
+const hm=d=>`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+const dur=ms=>{const m=Math.round(ms/60000);return m<60?`${m} min`:`${Math.floor(m/60)} h ${pad(m%60)} min`;};
+const kwh=wh=>`${n1.format(wh/1000)} kWh`;
+
+/* ---------- Tarife ---------- */
+const monthIn=(m,a,b)=>a<=b?(m>=a&&m<=b):(m>=a||m<=b);
+function windows(){
+  const s=S.settings, w=[{id:'summer',name:'Sommersonne',price:s.cheap,mFrom:s.mFrom,mTo:s.mTo,hFrom:s.hFrom,hTo:s.hTo}];
+  if(hasWinter()) w.push({id:'winter',name:'Wintersonne',price:s.wPrice,mFrom:s.wMFrom,mTo:s.wMTo,hFrom:s.wHFrom,hTo:s.wHTo});
+  return w;
+}
+function seasonWin(d){const m=d.getMonth()+1; return windows().find(w=>monthIn(m,w.mFrom,w.mTo))||null;}
+function tariffAt(ts){const d=new Date(ts),w=seasonWin(d),h=d.getHours(); return w&&h>=w.hFrom&&h<w.hTo?w:null;}
+const priceOf=w=>w?w.price:S.settings.normal;
+
+/* =====================================================================
+   Datenmodell v2: Jede Ladung ist die einzige Quelle der Wahrheit.
+   Die Ladezeiten kommen direkt von der Wallbox (lccfi = angesteckt,
+   lcctc = Ladebeginn, lccfc = Ladeende, wh = Energie dieser Steckung).
+   Dadurch stimmen Datum, Uhrzeit und Tarif auch dann, wenn die App
+   während der Ladung geschlossen war.
+   ===================================================================== */
+const TOL=90e3;
+const maxKw=()=>Math.min(11,S.maxKw||11);
+const EMPTY=()=>({c:0,w:0,n:0,cc:0,cw:0,cn:0,e:0});
+
+/* Darf die Wallbox laut Ladeplan zu diesem Zeitpunkt laden? */
+function allowedAt(ts){
+  const P=S.plan; if(!P) return true;
+  const d=new Date(ts), key=d.getDay()===0?'sch_sund':d.getDay()===6?'sch_satur':'sch_week', o=P[key];
+  if(!validSch(o)||o.control===0) return true;
+  const m=d.getHours()*60+d.getMinutes();
+  const inR=o.ranges.some(r=>{const b=r.begin.hour*60+r.begin.minute,e=r.end.hour*60+r.end.minute; if(b===e) return false; return b<e?(m>=b&&m<e):(m>=b||m<e);});
+  return o.control===1?inR:!inR;
+}
+/* Energie, deren genaue Ladezeit unbekannt ist, in erlaubte Zeitfenster legen */
+function place(t0,t1,wh,back){
+  if(wh<=0||!(t1>t0)) return [];
+  if(t1-t0>31*864e5) return [{t0,t1,wh}];
+  const STEP=5*60e3, perFull=maxKw()*1000*STEP/3.6e6, slots=[];
+  for(let t=t0;t<t1;){const e=Math.min((Math.floor(t/STEP)+1)*STEP,t1); if(allowedAt(t)) slots.push([t,e]); t=e;}
+  if(back) slots.reverse();
+  const out=[]; let rest=wh;
+  for(const[a,b]of slots){
+    if(rest<=0.5) break;
+    const cap=perFull*(b-a)/STEP, take=Math.min(cap,rest), used=(b-a)*take/cap;
+    out.push(back?{t0:b-used,t1:b,wh:take}:{t0:a,t1:a+used,wh:take}); rest-=take;
+  }
+  if(rest>0.5) out.push({t0,t1,wh:rest});
+  out.sort((x,y)=>x.t0-y.t0);
+  const m=[]; for(const s of out){const l=m[m.length-1]; if(l&&s.t0>=l.t1-1000&&s.t0-l.t1<1000){l.t1=s.t1;l.wh+=s.wh;} else m.push({...s});}
+  return m;
+}
+/* Ladeabschnitte → Tarif- und Kostenaufteilung je Tag */
+function computeSession(C){
+  const per=(C.periods||[]).filter(p=>p.t1>p.t0).sort((a,b)=>a.t0-b.t0);
+  const kw=maxKw()*1000, dur=per.reduce((s,p)=>s+p.t1-p.t0,0), cap=dur/3.6e6*kw;
+  let segs=[], est=!!C.est, rest=C.wh;
+  if(per.length&&C.wh<=cap*1.08){ per.forEach(p=>segs.push({t0:p.t0,t1:p.t1,wh:C.wh*(p.t1-p.t0)/dur})); rest=0; }
+  else if(per.length){ per.forEach(p=>{const w=(p.t1-p.t0)/3.6e6*kw; segs.push({t0:p.t0,t1:p.t1,wh:w}); rest-=w;}); }
+  if(rest>50){
+    est=true;
+    const win=C.win||[C.plugIn, per.length?per[0].t0:(C.plugOut||C.lastSeen||Date.now())];
+    segs=segs.concat(place(win[0],Math.max(win[0]+60e3,win[1]),rest,!!C.fillBack));
+  }
+  if(C.tailWh>50){ est=true; segs=segs.concat(place(C.tailWin[0],Math.max(C.tailWin[0]+60e3,C.tailWin[1]),C.tailWh,false)); }
+  segs.sort((a,b)=>a.t0-b.t0);
+  const split={}; let c=0,w=0,cost=0;
+  for(const s of segs){
+    let t=s.t0;
+    while(t<s.t1){
+      const h=new Date(t); h.setMinutes(0,0,0); h.setHours(h.getHours()+1);
+      const e=Math.min(h.getTime(),s.t1), part=s.wh*(e-t)/(s.t1-s.t0), tw=tariffAt(t), co=part/1000*priceOf(tw);
+      const k=dayKey(new Date(t)), D=split[k]||(split[k]=EMPTY());
+      if(tw&&tw.id==='summer'){D.c+=part;D.cc+=co;c+=part;} else if(tw&&tw.id==='winter'){D.w+=part;D.cw+=co;w+=part;} else {D.n+=part;D.cn+=co;}
+      if(est) D.e+=part; cost+=co; t=e;
+    }
+  }
+  Object.assign(C,{segs,split,cheapWh:c,winWh:w,cost,est,
+    start:segs.length?segs[0].t0:(C.plugIn||C.lastSeen),
+    end:segs.length?Math.max(...segs.map(s=>s.t1)):(C.plugIn||C.lastSeen),
+    chargeMs:segs.reduce((a,s)=>a+(s.t1-s.t0),0),
+    startApprox:est&&!(per.length&&rest<=50&&!(C.tailWh>50)), endApprox:est});
+  return C;
+}
+function newSession(plugIn,now){return {id:'p'+Math.round(plugIn||now),plugIn,plugOut:null,periods:[],wh:0,est:false,lastSeen:now};}
+function closeSession(C){
+  computeSession(C);
+  if(C.wh>10&&!S.sessions.some(s=>s.id===C.id)){ S.sessions.push(C); S.sessions.sort((a,b)=>b.start-a.start); }
+  S.archive=S.archive||{};
+  while(S.sessions.length>2000){const o=S.sessions.pop(); for(const[k,D]of Object.entries(o.split||{})){const A=S.archive[k]||(S.archive[k]=EMPTY()); for(const f in A) A[f]+=D[f]||0;}}
+}
+const samePlug=(C,t)=>!!C&&t!=null&&C.plugIn!=null&&Math.abs(C.plugIn-t)<TOL;
+function absT(d,v,now){ if(!isNum(v)||!isNum(d.rbt)||v>d.rbt+1000) return null; return now-(d.rbt-v); }
+function setPeriod(C,cS,cE,charging,now,prevTs){
+  if(cS!=null&&(C.plugIn==null||cS>=C.plugIn-TOL)){
+    const t1=charging?now:(cE!=null&&cE>=cS?cE:now);
+    const p=C.periods.find(p=>Math.abs(p.t0-cS)<TOL);
+    if(p) p.t1=Math.max(p.t1,t1); else C.periods.push({t0:cS,t1});
+  } else if(charging){ /* Wallbox liefert keinen Zeitstempel: selbst beobachten */
+    const p=C.periods[C.periods.length-1];
+    if(p&&now-p.t1<TOL*2) p.t1=now; else C.periods.push({t0:Math.max(prevTs||now,now-60e3),t1:now});
+  }
+}
+
+/* Eine Antwort der Wallbox verarbeiten */
+function ingest(d,now){
+  if(isNum(S.lastTs)&&now<S.lastTs-1000) return; /* ältere Daten als bereits verarbeitet */
+  const power=Array.isArray(d.nrg)?(d.nrg[11]||0):0;
+  if(power>1000) S.maxKw=Math.min(11,Math.max(S.maxKw||0,power/1000));
+  const car=d.car, plugged=[2,3,4].includes(car), charging=car===2||power>200;
+  const plugAt=absT(d,d.lccfi,now), cS=absT(d,d.lcctc,now), cE=absT(d,d.lccfc,now);
+  const first=!isNum(S.lastEto)||d.eto<S.lastEto;
+  const delta=first?0:d.eto-S.lastEto, gapStart=first?now:Math.max(S.lastTs,isNum(d._prev)&&d._prev<now?d._prev:0);
+  let explained=0, tailTo=null;
+
+  /* 1) bekannte, offene Ladung fortschreiben oder abschließen */
+  if(S.cur){
+    const C=S.cur;
+    if(samePlug(C,plugAt)||(plugAt==null&&(plugged||charging))){
+      const w=d.wh>0?d.wh:C.wh; explained+=Math.max(0,w-C.wh); C.wh=Math.max(C.wh,w);
+      setPeriod(C,cS,cE,charging,now,gapStart); C.lastSeen=now;
+      if(!plugged){ C.plugOut=now-gapStart<=6*60e3?now:null; tailTo=C; S.cur=null; }
+    } else { /* inzwischen abgesteckt und neu angesteckt */
+      C.tailWin=[C.lastSeen,plugAt&&plugAt>C.lastSeen?plugAt:now]; tailTo=C; S.cur=null;
+    }
+  }
+  /* 2) Steckung, die die App noch nicht kennt (auch komplett verpasste Ladungen) */
+  const lastEnd=S.sessions.reduce((m,s)=>s.missed?m:Math.max(m,s.end||0),0);
+  if(!S.cur&&plugAt!=null&&plugAt>Math.min(lastEnd,first?Infinity:gapStart)-TOL&&!S.sessions.some(s=>samePlug(s,plugAt))&&!(tailTo&&samePlug(tailTo,plugAt))){
+    const C=newSession(plugAt,now); C.wh=d.wh>0?d.wh:0; if(!first) explained+=C.wh;
+    setPeriod(C,cS,cE,charging,now,gapStart);
+    const hi=C.periods.length?Math.max(...C.periods.map(p=>p.t1)):now;
+    S.sessions=S.sessions.filter(s=>!(s.legacy&&s.end>plugAt&&s.start<hi));
+    if(plugged) S.cur=C; else closeSession(C);
+  } else if(!S.cur&&plugged&&plugAt==null){
+    const C=newSession(now,now); C.plugInApprox=true; C.wh=d.wh>0?d.wh:0; setPeriod(C,null,null,charging,now,gapStart); S.cur=C;
+  }
+  /* 3) Energie, die keiner bekannten Ladung zugeordnet ist */
+  let rest=delta-explained;
+  if(tailTo){
+    if(rest>50){ if(tailTo.tailWin) tailTo.tailWh=(tailTo.tailWh||0)+rest; else tailTo.wh+=rest; rest=0; }
+    closeSession(tailTo);
+  }
+  if(!first&&rest>100){
+    const C=newSession(null,now); C.id='m'+now; C.wh=rest; C.est=true; C.missed=true; C.fillBack=true;
+    C.win=[gapStart,plugAt&&plugAt>gapStart?plugAt:now]; closeSession(C);
+  }
+  S.lastEto=d.eto; S.lastTs=now;
+}
+
+/* Bestehende Daten einmalig ins neue Modell übernehmen und neu berechnen */
+function migrateV2(now){
+  let prevEnd=null;
+  for(const s of [...S.sessions].sort((a,b)=>a.start-b.start)){
+    if(s.periods){prevEnd=s.end;continue;}
+    s.legacy=!s.imported;
+    s.id=s.id||('o'+s.start); s.lastSeen=s.end;
+    if(s.imported) s.periods=[{t0:s.start,t1:s.end}];
+    else if(s.est||s.startApprox||s.endApprox){ /* Zeitpunkt war nur geraten: neu schätzen */
+      const end=Math.max(s.plugOut||s.end,s.end);
+      s.periods=[]; s.win=[Math.max(prevEnd??end-7*864e5,end-7*864e5),end]; s.fillBack=true; s.est=true; s.redo=true;
+    } else s.periods=[{t0:s.start,t1:s.end}];
+    computeSession(s); prevEnd=s.end;
+  }
+  S.sessions.sort((a,b)=>b.start-a.start);
+  if(S.last){S.lastEto=S.last.eto;S.lastTs=S.last.ts;}
+  if(S.cur){ S.lastTs=Math.min(S.lastTs??now,(S.cur.plugIn||now)-3*TOL); S.cur=null; } /* offene Ladung frisch von der Wallbox holen */
+  delete S.last; delete S.days; S.archive=S.archive||{}; S.v=2;
+}
+
+/* ---------- API ---------- */
+class ApiErr extends Error{constructor(kind,msg){super(msg);this.kind=kind;}}
+function httpErr(st){
+  if(st===401) return new ApiErr('auth','Der Token wurde abgelehnt. Kopiere ihn erneut aus der go-e App (Internet → Cloud-API).');
+  if(st===403) return new ApiErr('offline','Die Wallbox ist gerade nicht mit der go-e Cloud verbunden, oder die Cloud-API ist in der go-e App ausgeschaltet.');
+  if(st===404) return new ApiErr('offline','Die Wallbox hat der go-e Cloud gerade keine aktuellen Daten geschickt.');
+  if(st===429) return new ApiErr('busy','Die go-e Cloud ist gerade ausgelastet.');
+  if(st===422) return new ApiErr('rejected','Die Wallbox hat die Änderung abgelehnt.');
+  return new ApiErr('temp',`Die go-e Cloud antwortet mit Fehler ${st}.`);
+}
+/* Alle Anfragen nacheinander, nie mehrere gleichzeitig */
+let apiChain=Promise.resolve();
+function queued(fn){const p=apiChain.then(fn,fn); apiChain=p.catch(()=>{}); return p;}
+const base=()=>`https://${S.settings.serial.trim()}.api.v3.go-e.io/api`;
+
+function setKeys(obj){
+  return queued(async()=>{
+    const q=Object.entries(obj).map(([k,v])=>`${k}=${encodeURIComponent(JSON.stringify(v))}`).join('&');
+    let r;
+    try{r=await fetch(`${base()}/set?token=${encodeURIComponent(S.settings.token.trim())}&${q}`,{cache:'no-store'});}
+    catch(e){throw new ApiErr('net','Keine Verbindung zur go-e Cloud.');}
+    if(!r.ok) throw httpErr(r.status);
+    let j={}; try{j=await r.json();}catch(e){}
+    for(const k of Object.keys(obj)) if(j&&j[k]!==undefined&&j[k]!==true) throw new ApiErr('rejected',`Die Wallbox hat „${k}“ nicht übernommen: ${j[k]}`);
+    return j;
+  });
+}
+const FILTER='car,eto,nrg,wh,frc,modelStatus,trx,sch_week,sch_satur,sch_sund,rbt,lccfi,lcctc,lccfc';
+function fetchStatus(serial,token,filter=FILTER){
+  serial=String(serial).trim(); token=String(token).trim();
+  return queued(async()=>{
+    if(!/^\d+$/.test(serial)) throw new ApiErr('config','Die Seriennummer besteht nur aus Ziffern. Du findest sie in der go-e App oder auf dem Typenschild.');
+    let r;
+    try{r=await fetch(`https://${serial}.api.v3.go-e.io/api/status?filter=${filter}&age=120&token=${encodeURIComponent(token)}`,{cache:'no-store'});}
+    catch(e){throw new ApiErr('net','Keine Verbindung zur go-e Cloud. Prüfe die Internetverbindung.');}
+    if(!r.ok) throw httpErr(r.status);
+    const j=await r.json(), d=j&&j.data?j.data:j;
+    if(filter===FILTER&&typeof d.eto!=='number') throw new ApiErr('config','Die Antwort enthält keinen Zählerstand. Stimmt die Seriennummer?');
+    const lm=Date.parse(r.headers.get('last-modified')||''); d._ts=isNum(lm)&&Math.abs(Date.now()-lm)<10*60e3?lm:Date.now();
+    return d;
+  });
+}
+
+let polling=false, fails=0, errKind='', lastOk=null, srv=null;
+const snapToD=s=>({_prev:s.prev,car:s.car,eto:s.eto,wh:s.wh,rbt:s.rbt,lccfi:s.lccfi,lcctc:s.lcctc,lccfc:s.lccfc,nrg:[0,0,0,0,0,0,0,0,0,0,0,s.p||0]});
+async function fetchServer(key,since){
+  let r;
+  try{r=await fetch(`/.netlify/functions/goe-data?since=${since||0}`,{headers:{'x-app-key':key},cache:'no-store'});}
+  catch(e){return {ok:false,msg:'Der Netlify-Server ist nicht erreichbar.'};}
+  if(r.status===403) return {ok:false,msg:'Der App-Schlüssel stimmt nicht mit APP_KEY bei Netlify überein.'};
+  if(!r.ok) return {ok:false,msg:`Die Hintergrund-Funktion antwortet nicht (Fehler ${r.status}). Ist die ZIP-Datei mit den Funktionen hochgeladen?`};
+  try{const j=await r.json(); return {ok:true,snaps:j.snaps||[],hb:j.heartbeat};}catch(e){return {ok:false,msg:'Die Antwort des Servers ist ungültig.'};}
+}
+/* Messungen, die Netlify bei geschlossener App gesammelt hat, der Reihe nach nachspielen */
+async function syncServer(){
+  const k=S.settings.appKey; if(!k||S.v!==2){srv=null;return;}
+  const res=await fetchServer(k,S.lastTs||0); srv=res; if(!res.ok) return;
+  for(const sn of res.snaps.sort((a,b)=>a.ts-b.ts)){ if(isNum(S.lastTs)&&sn.ts<=S.lastTs) continue; ingest(snapToD(sn),sn.ts); }
+}
+function srvProblem(){
+  if(!S.settings.appKey||!srv) return '';
+  if(!srv.ok) return srv.msg;
+  const hb=srv.hb; if(!hb) return 'Die Hintergrund-Aufzeichnung hat noch keine Messung geliefert. Sie startet spätestens 5 Minuten nach dem Hochladen.';
+  if(Date.now()-hb.ts>20*60e3) return `Die Hintergrund-Aufzeichnung läuft seit ${hm(new Date(hb.ts))} Uhr nicht mehr.`;
+  if(!hb.ok) return hb.status===401?'Die Hintergrund-Aufzeichnung wird von der go-e Cloud abgelehnt. Prüfe GOE_TOKEN bei Netlify.':hb.status==='config'?'Bei Netlify fehlen GOE_SERIAL oder GOE_TOKEN.':'';
+  return '';
+}
+async function poll(){
+  if(polling) return; polling=true;
+  try{
+    const st=S.settings;
+    if(!st.serial||!st.token||!hasNormal()){render();return;}
+    let d=null;
+    try{ d=await fetchStatus(st.serial,st.token); }catch(e){ fails++; errKind=e.kind||'temp'; lastErr=e.message; }
+    if(d&&S.v!==2){ if(PLAN.every(p=>validSch(d[p.key]))) S.plan={sch_week:d.sch_week,sch_satur:d.sch_satur,sch_sund:d.sch_sund}; migrateV2(d._ts); }
+    await syncServer();
+    if(!d){ save(); render(); return; }
+    try{
+      const now=d._ts, car=d.car;
+      live=d; fails=0; errKind=''; lastErr=''; lastOk=Date.now();
+      if(PLAN.every(p=>validSch(d[p.key]))) S.plan={sch_week:d.sch_week,sch_satur:d.sch_satur,sch_sund:d.sch_sund};
+      ingest(d,now);
+      if(S.manual&&car===1&&d.frc===2){ try{await setKeys({frc:0}); d.frc=0;}catch(e){} S.manual=false; }
+      if(S.manual&&d.frc!==2) S.manual=false;
+      save();
+    }catch(e){ fails++; errKind=e.kind||'temp'; lastErr=e.message; }
+    render();
+  } finally { polling=false; }
+}
+
+/* ---------- Leistung live ---------- */
+const MAXW=11000, HIST=[]; let shownW=0, tween=null, fastBusy=false;
+function powerColor(w){const f=Math.max(0,Math.min(1,w/MAXW)); const dark=matchMedia('(prefers-color-scheme: dark)').matches; return `hsl(${Math.round(f*120)} 78% ${dark?55:44}%)`;}
+function setPower(w){
+  if(w==null){$('power').textContent='–';return;}
+  w=Math.max(0,w); const col=powerColor(w), pct=Math.min(100,w/MAXW*100);
+  const g=$('gaugeVal'); g.setAttribute('stroke-dasharray',`${pct.toFixed(1)} 100`); g.style.stroke=col;
+  /* Zahl weich hochzählen */
+  cancelAnimationFrame(tween); const from=shownW, t0=performance.now(), D=800;
+  const step=t=>{const k=Math.min(1,(t-t0)/D), e=1-Math.pow(1-k,3); shownW=from+(w-from)*e; $('power').textContent=`${n1.format(shownW/1000)} kW`; if(k<1) tween=requestAnimationFrame(step);};
+  tween=requestAnimationFrame(step);
+  const last=HIST[HIST.length-1];
+  if(!last||Date.now()-last.t>2000) HIST.push({t:Date.now(),w}); while(HIST.length>60) HIST.shift();
+  const pts=HIST.map((h,i)=>`${(HIST.length<2?120:i/(HIST.length-1)*120).toFixed(1)},${(24-Math.min(1,h.w/MAXW)*22).toFixed(1)}`).join(' ');
+  const pl=$('sparkLine'); pl.setAttribute('points',HIST.length<2?`0,${pts.split(',')[1]} ${pts}`:pts); pl.style.stroke=col;
+}
+/* Solange geladen wird: alle 5 Sekunden nur die Leistung abfragen */
+async function fastPoll(){
+  const st=S.settings, on=live&&(live.car===2||(Array.isArray(live.nrg)&&live.nrg[11]>200));
+  $('liveDot').classList.toggle('on',!!on&&document.visibilityState==='visible');
+  if(!on||fastBusy||polling||fails>0||document.visibilityState!=='visible'||!st.serial||!st.token) return;
+  fastBusy=true;
+  try{
+    const d=await fetchStatus(st.serial,st.token,'car,nrg');
+    if(Array.isArray(d.nrg)){live.nrg=d.nrg; if(typeof d.car==='number')live.car=d.car; setPower(d.nrg[11]);
+      const sc=$('statusCell'),ch=live.car===2||d.nrg[11]>200; sc.className=ch?'status-charging':[3,4].includes(live.car)?'status-plugged':'';}
+  }catch(e){ /* still ignorieren, die normale Abfrage meldet echte Probleme */ }
+  fastBusy=false;
+}
+setInterval(fastPoll,5000);
+
+function startPolling(){clearInterval(timer); poll(); timer=setInterval(()=>{if(document.visibilityState==='visible')poll();},30000);}
+document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')poll();});
+
+/* ---------- 24-Stunden-Ring (0 Uhr unten, 12 Uhr oben) ---------- */
+const CX=120,CY=120,R=98;
+function pt(h,r){const a=(h/24)*2*Math.PI+Math.PI;return [CX+r*Math.sin(a),CY-r*Math.cos(a)];}
+function arc(h0,h1,r){
+  const span=((h1-h0)%24+24)%24||24;
+  if(span>=24) return `M ${CX} ${CY-r} A ${r} ${r} 0 1 1 ${CX-0.01} ${CY-r}`;
+  const [x0,y0]=pt(h0,r),[x1,y1]=pt(h0+span,r);
+  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${span>12?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
+}
+function drawDial(now,win,inSeason){
+  const h=now.getHours()+now.getMinutes()/60;
+  let t='';
+  for(let i=0;i<24;i++){
+    const major=i%6===0, [x,y]=pt(i,80);
+    if(major){const [lx,ly]=pt(i,78);t+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="11" font-family="Barlow Semi Condensed, Barlow, sans-serif" fill="var(--muted)">${i}</text>`;}
+    else t+=`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.4" fill="var(--muted)" opacity=".55"/>`;
+  }
+  const col=inSeason?`var(--${win.id})`:'var(--off)';
+  const [kx,ky]=pt(h,R);
+  $('dial').innerHTML=
+    `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--track)" stroke-width="16"/>`+
+    `<path d="${arc(win.hFrom,win.hTo,R)}" fill="none" stroke="${col}" stroke-width="16" stroke-linecap="round"/>`+
+    t+
+    `<circle cx="${kx.toFixed(2)}" cy="${ky.toFixed(2)}" r="12" fill="var(--panel)"/>`+
+    `<circle cx="${kx.toFixed(2)}" cy="${ky.toFixed(2)}" r="7.5" fill="var(--ink)"/>`;
+}
+function until(now,hour){const t=new Date(now);t.setHours(hour,0,0,0);if(t<=now)t.setDate(t.getDate()+1);return t-now;}
+function short(ms){const m=Math.round(ms/60000);return m<60?`${m} min`:`${Math.floor(m/60)} h ${pad(m%60)} min`;}
+
+/* ---------- Auswertung ---------- */
+const MON=['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+function periodPrefix(){const y=view.getFullYear(),m=view.getMonth();return S.period==='month'?`${y}-${pad(m+1)}-`:S.period==='year'?`${y}-`:'';}
+function allSplits(){
+  if(S.v!==2) return Object.entries(S.days||{}).map(([k,D])=>{const cc=isNum(D.cc)?D.cc:D.c/1000*S.settings.cheap,cw=isNum(D.cw)?D.cw:0;return [k,{c:D.c,w:D.w||0,n:D.n,e:D.e||0,cc,cw,cn:isNum(D.cn)?D.cn:Math.max(0,D.cost-cc-cw)}];});
+  const out=[]; const add=o=>{for(const e of Object.entries(o||{})) out.push(e);};
+  if(S.cur) add(S.cur.split); S.sessions.forEach(s=>add(s.split)); add(S.archive);
+  return out;
+}
+let SPLITS=[];
+function sumDays(prefix){
+  const A={c:0,w:0,n:0,e:0,cost:0,cc:0,cw:0,cn:0};
+  for(const[k,D]of SPLITS) if(k.startsWith(prefix)){A.c+=D.c;A.w+=D.w;A.n+=D.n;A.e+=D.e;A.cc+=D.cc;A.cw+=D.cw;A.cn+=D.cn;A.cost+=D.cc+D.cw+D.cn;}
+  return A;
+}
+function barsData(){
+  const y=view.getFullYear(),m=view.getMonth();
+  if(S.period==='month'){const n=new Date(y,m+1,0).getDate();return Array.from({length:n},(_,i)=>({lbl:`${i+1}.`,t:`${i+1}.`,...sumDays(`${y}-${pad(m+1)}-${pad(i+1)}`)}));}
+  if(S.period==='year') return MON.map((l,i)=>({lbl:l.charAt(0),t:l,...sumDays(`${y}-${pad(i+1)}-`)}));
+  const ys=SPLITS.map(([k])=>+k.slice(0,4)); const a=ys.length?Math.min(...ys):y, b=Math.max(y,...ys);
+  return Array.from({length:b-a+1},(_,i)=>({lbl:String(a+i),t:String(a+i),...sumDays(`${a+i}-`)}));
+}
+function sessionsInPeriod(){
+  const y=view.getFullYear(),m=view.getMonth();
+  return S.sessions.filter(s=>{const d=new Date(s.start);return S.period==='all'||(d.getFullYear()===y&&(S.period==='year'||d.getMonth()===m));});
+}
+const pct=(a,t)=>Math.round(a/t*100);
+function shares(s,w,tot){const p=[];if(s>0)p.push(`${pct(s,tot)} % Sommersonne`);if(w>0)p.push(`${pct(w,tot)} % Wintersonne`);return p.join(', ');}
+
+/* ---------- Anzeige ---------- */
+/* ---------- Ladeplan & manuelles Laden ---------- */
+const PLAN=[{key:'sch_week',lbl:'Mo–Fr',days:[1,2,3,4,5]},{key:'sch_satur',lbl:'Sa',days:[6]},{key:'sch_sund',lbl:'So',days:[0]}];
+const t2s=t=>t?`${pad(t.hour)}:${pad(t.minute)}`:'00:00';
+const s2t=v=>{const[h,m]=String(v||'00:00').split(':').map(Number);return {hour:h||0,minute:m||0};};
+let planDirty=false;
+function validSch(o){return o&&typeof o==='object'&&Array.isArray(o.ranges)&&o.ranges[0]&&o.ranges[0].begin&&typeof o.ranges[0].begin.hour==='number';}
+function planFor(date){const g=PLAN.find(p=>p.days.includes(date.getDay())); const o=live&&live[g.key]; return {g,o};}
+/* Liegt der Zeitpunkt im Ladeplan? null = kein Plan aktiv für diesen Tag */
+function inPlan(date){
+  const {o}=planFor(date); if(!validSch(o)||o.control!==1) return null;
+  const m=date.getHours()*60+date.getMinutes();
+  return o.ranges.some(r=>{const b=r.begin.hour*60+r.begin.minute,e=r.end.hour*60+r.end.minute; if(b===e) return false; return b<e?(m>=b&&m<e):(m>=b||m<e);});
+}
+const MS={2:'wartet auf Freigabe (RFID)',3:'manuell gestartet',4:'Laden ist gesperrt',5:'wartet auf das Zeitfenster im Ladeplan',6:'Energielimit erreicht',7:'wegen günstigem Preis',12:'mit PV-Überschuss',14:'laut Ladeplan'};
+
+function renderCharge(){
+  const btn=$('chargeBtn'), ok=live&&S.settings.serial&&S.settings.token;
+  if(!ok){btn.disabled=true;$('planSave').disabled=true;$('planRows').innerHTML=planRowsHtml();return;}
+  const car=live.car, forced=live.frc===2, plugged=[2,3,4].includes(car);
+  const why=MS[live.modelStatus];
+  $('why').innerHTML=!plugged?'Kein Auto angesteckt.':`Status: <strong>${CAR[car]}</strong>${why?`, ${why}`:''}.`;
+  if(forced){btn.textContent='Zurück zum Ladeplan';btn.className='bigbtn back';btn.disabled=false;}
+  else if(live.frc===1){btn.textContent='Sperre aufheben';btn.className='bigbtn back';btn.disabled=false;}
+  else{btn.textContent=car===2?'Lädt bereits':'Jetzt laden';btn.className='bigbtn';btn.disabled=!plugged||car===2;}
+  $('manualBanner').innerHTML=forced?`<div class="banner">Manuelle Ladung aktiv. Der Ladeplan wird ignoriert, bis du „Zurück zum Ladeplan“ tippst.</div>`:'';
+  if(!planDirty) $('planRows').innerHTML=planRowsHtml();
+  $('planSave').disabled=!PLAN.every(p=>validSch(live[p.key]));
+}
+function planRowsHtml(){
+  return PLAN.map(p=>{
+    const o=live&&live[p.key], v=validSch(o), on=v&&o.control===1, r=v?o.ranges[0]:null;
+    return `<div class="prow" data-key="${p.key}"><label class="sw" aria-label="${p.lbl} aktiv"><input type="checkbox" ${on?'checked':''} ${v?'':'disabled'} onchange="planDirty=true;this.closest('.prow').querySelectorAll('input[type=time]').forEach(i=>i.disabled=!this.checked)"><span></span></label>
+      <span class="lbl">${p.lbl}</span>
+      <input type="time" class="b" value="${r?t2s(r.begin):'10:00'}" ${on?'':'disabled'} oninput="planDirty=true" aria-label="${p.lbl} von">
+      <input type="time" class="e" value="${r?t2s(r.end):'16:00'}" ${on?'':'disabled'} oninput="planDirty=true" aria-label="${p.lbl} bis"></div>`;
+  }).join('')+(live&&!PLAN.every(p=>validSch(live[p.key]))?`<div class="out">Den Ladeplan deiner Wallbox konnte ich nicht lesen. Stell ihn bitte in der go-e App ein.</div>`:'');
+}
+$('planSun').onclick=()=>{
+  const w=seasonWin(new Date())||windows()[0];
+  document.querySelectorAll('.prow').forEach(row=>{
+    row.querySelector('input[type=checkbox]').checked=true;
+    const b=row.querySelector('.b'),e=row.querySelector('.e');
+    b.value=`${pad(w.hFrom)}:00`; e.value=`${pad(w.hTo%24)}:00`; b.disabled=e.disabled=false;
+  });
+  planDirty=true; $('planOut').textContent=`${w.name}-Zeiten eingetragen. Tippe auf „Ladeplan speichern“.`;
+};
+$('planSave').onclick=async()=>{
+  const upd={};
+  for(const row of document.querySelectorAll('.prow')){
+    const k=row.dataset.key, cur=live[k], on=row.querySelector('input[type=checkbox]').checked;
+    const b=s2t(row.querySelector('.b').value), e=s2t(row.querySelector('.e').value);
+    if(on&&b.hour===e.hour&&b.minute===e.minute){$('planOut').textContent='Beginn und Ende dürfen nicht gleich sein.';return;}
+    const ranges=cur.ranges.map((r,i)=>i===0?{...r,begin:b,end:e}:{...r,begin:{hour:0,minute:0},end:{hour:0,minute:0}});
+    upd[k]={...cur,control:on?1:0,ranges};
+  }
+  $('planOut').textContent='Speichere …';
+  try{await setKeys(upd); planDirty=false; $('planOut').textContent='Ladeplan gespeichert.'; await poll();}
+  catch(e){$('planOut').textContent=e.message;}
+};
+
+const cDlg=$('confirmDlg');
+async function startManual(){
+  const upd={frc:2}; if(live.modelStatus===2&&live.trx==null) upd.trx=0;
+  try{await setKeys(upd); S.manual=true; save(); await poll();}
+  catch(e){lastErr=e.message;errKind='action';render();}
+}
+$('chargeBtn').onclick=async()=>{
+  if(!live) return;
+  if(live.frc===2||live.frc===1){ try{await setKeys({frc:0}); S.manual=false; save(); await poll();}catch(e){lastErr=e.message;errKind='action';render();} return; }
+  const now=new Date(), plan=inPlan(now), cheap=tariffAt(now.getTime());
+  const outside=plan===false||(plan===null&&!cheap);
+  if(!outside){startManual();return;}
+  const {g,o}=planFor(now), price=hasNormal()?`${n2.format(priceOf(cheap))} ct/kWh`:'der aktuelle Preis';
+  $('confirmText').innerHTML=plan===false
+    ?`Dein Ladeplan für ${g.lbl} erlaubt das Laden nur von ${t2s(o.ranges[0].begin)} bis ${t2s(o.ranges[0].end)} Uhr. Jetzt gilt <strong>${cheap?cheap.name:'Normaltarif'} mit ${price}</strong>. Möchtest du die Ladung trotzdem manuell starten?`
+    :`Gerade gilt kein günstiger Tarif, sondern <strong>Normaltarif mit ${price}</strong>. Möchtest du die Ladung trotzdem manuell starten?`;
+  cDlg.returnValue=''; cDlg.showModal();
+};
+cDlg.addEventListener('close',()=>{if(cDlg.returnValue==='yes') startManual();});
+
+const CAR={0:'Unbekannt',1:'Nicht angesteckt',2:'Lädt',3:'Angesteckt',4:'Ladung fertig',5:'Fehler'};
+function render(){
+  if(S.cur) computeSession(S.cur);
+  SPLITS=allSplits();
+  renderCharge();
+  const now=new Date(), st=S.settings, sw=seasonWin(now), active=tariffAt(now.getTime());
+  const shown=sw||windows()[0];
+  drawDial(now,shown,!!sw);
+  $('clock').textContent=hm(now);
+  $('tariffNow').textContent=active?active.name:'Normaltarif';
+  $('countdown').textContent=!sw?'':active?`noch ${short(until(now,sw.hTo))}`:`${sw.name} in ${short(until(now,sw.hFrom))}`;
+  const pn=hasNormal()?n2.format(st.normal):'–';
+  $('tariffLine').innerHTML=!sw
+    ?`Heute gibt es keinen günstigen Zeitraum. ${shown.name} gilt wieder ab ${MON[shown.mFrom-1]}. Jetzt kostet jede kWh <strong>${pn} ct</strong>.`
+    :active?`<strong>${n2.format(sw.price)} ct/kWh</strong> bis ${sw.hTo}:00 Uhr, danach ${pn} ct/kWh.`
+    :`Jetzt <strong>${pn} ct/kWh</strong>. ${sw.name} von ${sw.hFrom} bis ${sw.hTo} Uhr: ${n2.format(sw.price)} ct/kWh.`;
+
+  let m='';
+  if(!st.serial||!st.token) m=`<div class="msg info">Trage Seriennummer und Cloud-API-Token deiner Wallbox ein, damit die App Ladungen aufzeichnen kann.<br><button class="btn" onclick="openSettings()">Einstellungen öffnen</button></div>`;
+  else if(!hasNormal()) m=`<div class="msg info">Trage noch deinen Normaltarif ein, damit Ladungen außerhalb der günstigen Zeitfenster richtig berechnet werden.<br><button class="btn" onclick="openSettings()">Preis eintragen</button></div>`;
+  else if(lastErr&&errKind==='action') m=`<div class="msg">${lastErr}</div>`;
+  else if(lastErr&&(errKind==='auth'||errKind==='config')&&fails>=2) m=`<div class="msg">${lastErr}<br><button class="btn" onclick="openSettings()">Einstellungen öffnen</button></div>`;
+  else if(lastErr&&fails>=4) m=`<div class="msg info">${lastErr} Die App versucht es weiter. Es gehen dabei keine Ladungen verloren, sie werden nachgetragen, sobald die Verbindung wieder steht.${lastOk?`<br><small>Letzte Daten um ${hm(new Date(lastOk))} Uhr.</small>`:''}</div>`;
+  if(!m){const sp=srvProblem(); if(sp) m=`<div class="msg info">${sp}</div>`;}
+  $('msg').innerHTML=m;
+
+  const sc=$('statusCell');
+  if(live){
+    const pw=Array.isArray(live.nrg)?(live.nrg[11]||0):0, charging=live.car===2||pw>200, plugged=[3,4].includes(live.car);
+    sc.className=charging?'status-charging':plugged?'status-plugged':'';
+  } else sc.className='';
+  if(live){
+    $('carState').textContent=CAR[live.car]??'–';
+    const p=Array.isArray(live.nrg)?live.nrg[11]:null;
+    setPower(p);
+  }
+  const C=S.cur;
+  $('curSession').innerHTML=!C?'Kein Auto angesteckt'
+    :!(C.segs&&C.segs.length)?`Angesteckt, lädt noch nicht<small>angesteckt um ${hm(new Date(C.plugIn))}</small>`
+    :`${n2.format(C.wh/1000)} kWh, ${eur.format(C.cost/100)}<small>Ladebeginn ${C.startApprox?'ca. ':''}${hm(new Date(C.start))}${live&&live.car!==2&&C.end?`, Ladeende ${C.endApprox?'ca. ':''}${hm(new Date(C.end))}`:''}</small>`;
+
+  /* Zeitraum */
+  $('periodSel').value=S.period;
+  $('nav').style.visibility=S.period==='all'?'hidden':'visible';
+  $('periodTitle').textContent=S.period==='month'?view.toLocaleDateString('de-AT',{month:'long',year:'numeric'}):String(view.getFullYear());
+  const A=sumDays(periodPrefix()), tot=A.c+A.w+A.n;
+  const noun=S.period==='month'?'In diesem Monat':S.period==='year'?'In diesem Jahr':'Bisher';
+  $('pCost').textContent=eur.format(A.cost/100);
+  $('pSub').textContent=tot>0?[kwh(tot),`im Schnitt ${n2.format(A.cost/(tot/1000))} ct/kWh`,shares(A.c,A.w,tot),A.e>0?`${kwh(A.e)} geschätzt`:''].filter(Boolean).join(', '):`${noun} wurde noch nichts geladen.`;
+  $('pSplit').innerHTML=tot>0?`<i style="width:${A.c/tot*100}%;background:var(--summer)"></i><i style="width:${A.w/tot*100}%;background:var(--winter)"></i>`:'';
+
+  const B=barsData(), max=Math.max(0,...B.map(b=>b.c+b.w+b.n));
+  $('bars').innerHTML=B.map(b=>{const h=v=>max?v/max*100:0;return `<div class="b" title="${b.t}: ${kwh(b.c+b.w+b.n)}, ${eur.format(b.cost/100)}"><i style="height:${h(b.c)}%;background:var(--summer)"></i><i style="height:${h(b.w)}%;background:var(--winter)"></i><i style="height:${h(b.n)}%;background:var(--grid)"></i></div>`;}).join('');
+  $('barsX').innerHTML=S.period==='month'?`<span>1.</span><span>${Math.ceil(B.length/2)}.</span><span>${B.length}.</span>`:B.map(b=>`<span>${b.lbl}</span>`).join('');
+
+  /* Erweiterte Details */
+  const ses=sessionsInPeriod();
+  const cnt={summer:0,winter:0,normal:0};
+  for(const s of ses){const nw=s.wh-(s.cheapWh||0)-(s.winWh||0); if((s.cheapWh||0)>10)cnt.summer++; if((s.winWh||0)>10)cnt.winter++; if(nw>10)cnt.normal++;}
+  const rows=[{id:'summer',name:'Sommersonne',wh:A.c,cost:A.cc},{id:'winter',name:'Wintersonne',wh:A.w,cost:A.cw},{id:'normal',name:'Normaltarif',wh:A.n,cost:A.cn}]
+    .filter(r=>r.id!=='winter'||hasWinter()||r.wh>0);
+  const color={summer:'var(--summer)',winter:'var(--winter)',normal:'var(--grid)'};
+  const lad=n=>`${n} ${n===1?'Ladung':'Ladungen'}`;
+  const saved=hasNormal()?tot/1000*st.normal-A.cost:0;
+  $('moreBody').innerHTML=rows.map(r=>`<div class="tar"><div class="name"><span class="dot" style="background:${color[r.id]}"></span>${r.name}</div><div class="cost num">${eur.format(r.cost/100)}</div><div class="meta num">${lad(cnt[r.id])}, ${kwh(r.wh)}${r.wh>0?`, im Schnitt ${n2.format(r.cost/(r.wh/1000))} ct/kWh`:''}</div></div>`).join('')
+    +`<div class="tar sum"><div class="name">Gesamt</div><div class="cost num">${eur.format(A.cost/100)}</div><div class="meta num">${lad(ses.length)}, ${kwh(tot)}${saved>0?`, ${eur.format(saved/100)} gespart gegenüber reinem Normaltarif`:''}</div></div>`
+    +`<div class="foot">Eine Ladung, die über einen Tarifwechsel läuft, zählt bei beiden Tarifen. Deshalb kann die Summe der Ladungen je Tarif größer sein als die Gesamtzahl.</div>`;
+
+  /* Ladevorgänge */
+  const shownSes=ses.slice(0,200);
+  $('sessions').innerHTML=shownSes.length?shownSes.map(s=>{
+    const a=new Date(s.start),b=new Date(s.end),sh=s.wh?shares(s.cheapWh||0,s.winWh||0,s.wh):'';
+    const plug=s.plugIn&&!s.redo?`angesteckt ${hm(new Date(s.plugIn))}${new Date(s.plugIn).toDateString()!==a.toDateString()?` (${new Date(s.plugIn).toLocaleDateString('de-AT',{day:'numeric',month:'numeric'})})`:''}${s.plugOut?`, abgesteckt ${hm(new Date(s.plugOut))}`:''}`:'';
+    const note=s.imported?'aus go-e Export':s.missed?'ohne App erfasst, Zeit geschätzt':s.est?'Zeit geschätzt':'';
+    const parts=s.periods&&s.periods.length>1&&!s.est?`, in ${s.periods.length} Abschnitten`:'';
+    const date=a.toLocaleDateString('de-AT',S.period==='month'?{weekday:'short',day:'numeric',month:'numeric'}:{day:'numeric',month:'numeric',year:'2-digit'});
+    return `<li><div><div class="when">${date}, ${s.startApprox?'ca. ':''}${hm(a)}–${s.endApprox?'ca. ':''}${hm(b)}</div><div class="meta num">${[`${n2.format(s.wh/1000)} kWh in ${dur(s.chargeMs??(s.end-s.start))}${parts}`,sh,note].filter(Boolean).join(', ')}</div>${plug?`<div class="meta num">${plug}</div>`:''}</div><div class="cost num">${eur.format(s.cost/100)}</div></li>`;}).join('')
+    +(ses.length>200?`<li class="empty">Die neuesten 200 von ${ses.length} Ladungen werden angezeigt. Alle findest du im CSV-Export.</li>`:'')
+    :`<li class="empty">Abgeschlossene Ladungen erscheinen hier, sobald das Auto abgesteckt ist.</li>`;
+}
+
+/* ---------- Bedienung ---------- */
+$('periodSel').onchange=e=>{S.period=e.target.value;save();render();};
+function step(dir){if(S.period==='month')view.setMonth(view.getMonth()+dir);else view.setFullYear(view.getFullYear()+dir);render();}
+$('prevP').onclick=()=>step(-1);
+$('nextP').onclick=()=>step(1);
+
+const dlg=$('settings');
+const FIELDS={fSerial:'serial',fToken:'token',fKey:'appKey',fNormal:'normal',fSPrice:'cheap',fSMFrom:'mFrom',fSMTo:'mTo',fSHFrom:'hFrom',fSHTo:'hTo',fWPrice:'wPrice',fWMFrom:'wMFrom',fWMTo:'wMTo',fWHFrom:'wHFrom',fWHTo:'wHTo'};
+const PRICE=['normal','cheap','wPrice'];
+function openSettings(){
+  for(const[id,k]of Object.entries(FIELDS)){const v=S.settings[k];$(id).value=PRICE.includes(k)?(isNum(v)?n2.format(v):''):(v??'');}
+  $('testOut').textContent='';dlg.showModal();
+}
+$('openSettings').onclick=openSettings;
+dlg.addEventListener('close',()=>{
+  if(dlg.returnValue!=='save') return;
+  const num=id=>{const v=parseFloat(String($(id).value).replace(/\s/g,'').replace(',','.'));return isNaN(v)?null:v;};
+  const old=S.settings.serial,n={...S.settings};
+  for(const[id,k]of Object.entries(FIELDS)){
+    if(k==='serial'||k==='token'||k==='appKey') n[k]=$(id).value.trim();
+    else{const v=num(id);n[k]=v===null?(k==='normal'||k==='wPrice'?null:DEF.settings[k]):v;}
+  }
+  S.settings=n;
+  if(old!==n.serial){S.lastEto=null;S.lastTs=null;S.cur=null;}
+  save();startPolling();
+});
+$('keyGen').onclick=()=>{
+  const a=new Uint8Array(24); crypto.getRandomValues(a);
+  $('fKey').value=Array.from(a,b=>'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b%57]).join('');
+  $('keyOut').textContent='Neuer Schlüssel erzeugt. Kopiere ihn und trag ihn bei Netlify als APP_KEY ein.';
+};
+$('keyTest').onclick=async()=>{
+  const k=$('fKey').value.trim(); if(!k){$('keyOut').textContent='Bitte zuerst einen Schlüssel eintragen.';return;}
+  $('keyOut').textContent='Prüfe …';
+  const r=await fetchServer(k,Date.now()-864e5);
+  if(!r.ok){$('keyOut').textContent=r.msg;return;}
+  const hb=r.hb;
+  $('keyOut').textContent=!hb?'Verbunden. Die erste Messung kommt innerhalb von 5 Minuten.'
+    :hb.ok?`Läuft. Letzte Messung um ${hm(new Date(hb.ts))} Uhr.`
+    :`Verbunden, aber die Wallbox-Abfrage bei Netlify klappt nicht (${hb.status==='config'?'GOE_SERIAL oder GOE_TOKEN fehlt':hb.status===403?'Wallbox offline':'Fehler '+hb.status}).`;
+};
+$('testBtn').onclick=async()=>{
+  $('testOut').textContent='Verbinde …';
+  try{const d=await fetchStatus($('fSerial').value,$('fToken').value);$('testOut').textContent=`Verbunden. Zählerstand ${n1.format(d.eto/1000)} kWh, Status: ${CAR[d.car]??d.car}.`;}
+  catch(e){$('testOut').textContent=e.message;}
+};
+$('resetBtn').onclick=()=>{if(confirm('Alle aufgezeichneten Ladungen löschen? Die Einstellungen bleiben erhalten.')){S={...clone(DEF),settings:S.settings,plan:S.plan,v:2,archive:{}};save();dlg.close();startPolling();}};
+$('refresh').onclick=poll;
+$('exportCsv').onclick=()=>{
+  const t=v=>v?new Date(v).toLocaleString('de-AT'):'';
+  const rows=[['Ladebeginn','Ladeende','Ladedauer','kWh','davon Sommersonne kWh','davon Wintersonne kWh','davon Normaltarif kWh','Kosten EUR','Zeit ungefähr','Aufteilung geschätzt','angesteckt','abgesteckt','Quelle']];
+  for(const s of [...S.sessions].reverse()){const nw=Math.max(0,s.wh-(s.cheapWh||0)-(s.winWh||0));rows.push([t(s.start),t(s.end),dur(s.chargeMs??(s.end-s.start)),n2.format(s.wh/1000),n2.format((s.cheapWh||0)/1000),n2.format((s.winWh||0)/1000),n2.format(nw/1000),n2.format(s.cost/100),s.startApprox||s.endApprox?'ja':'nein',s.est?'ja':'nein',t(s.plugIn),t(s.plugOut),s.imported?'go-e Export':s.missed?'ohne App erfasst':'App']);}
+  const csv='\ufeff'+rows.map(r=>r.map(x=>`"${x}"`).join(';')).join('\n');
+  const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='ladevorgaenge.csv';a.click();
+};
+
+setInterval(render,30000);
+startPolling();
+</script>
+</body>
+</html>

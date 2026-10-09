@@ -1,0 +1,10 @@
+[build]
+  publish = "."
+  command = ""
+
+[functions]
+  directory = "netlify/functions"
+
+# Wallbox alle 5 Minuten im Hintergrund mitschreiben
+[functions."goe-sync"]
+  schedule = "*/5 * * * *"
