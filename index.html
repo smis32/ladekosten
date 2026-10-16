@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="theme-color" content="#1c2b39">
+<meta name="theme-color" content="#120d1f">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-title" content="Ladekosten">
@@ -13,20 +13,20 @@
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600&family=Barlow+Semi+Condensed:wght@500;600;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  --bg:#eef2f5; --panel:#ffffff; --ink:#1c2b39; --muted:#66788a; --line:#d5dee6; --track:#dde5ec;
-  --summer:#8fd400; --winter:#c9ec7a; --off:#e2efc4; --grid:#5d7184; --warn:#b3261e;
+  --bg:#f3f1f8; --panel:#ffffff; --ink:#1a1430; --muted:#6c6587; --line:#ddd8ea; --track:#e5e0f0;
+  --summer:#6d28f0; --winter:#b59cf5; --off:#ebe4fd; --grid:#56607a; --warn:#b3261e; --on-accent:#ffffff;
   box-sizing:border-box;
   padding-top:env(safe-area-inset-top,0px); padding-bottom:env(safe-area-inset-bottom,0px);
 }
 @media (prefers-color-scheme:dark){
   :root:not([data-theme="light"]){
-    --bg:#131d27; --panel:#1b2835; --ink:#e6edf3; --muted:#93a4b5; --line:#2c3c4c; --track:#243443;
-    --summer:#a8e62e; --winter:#6a9a1c; --off:#2d3d1c; --grid:#7f95aa; --warn:#ff8a80;
+    --bg:#0c0916; --panel:#151024; --ink:#ece8f7; --muted:#9a92b4; --line:#2a2242; --track:#231b38;
+    --summer:#9b5cff; --winter:#5a3aa6; --off:#271d44; --grid:#7a86a3; --warn:#ff8a80; --on-accent:#ffffff;
   }
 }
 :root[data-theme="dark"]{
-  --bg:#131d27; --panel:#1b2835; --ink:#e6edf3; --muted:#93a4b5; --line:#2c3c4c; --track:#243443;
-  --summer:#a8e62e; --winter:#6a9a1c; --off:#2d3d1c; --grid:#7f95aa; --warn:#ff8a80;
+  --bg:#0c0916; --panel:#151024; --ink:#ece8f7; --muted:#9a92b4; --line:#2a2242; --track:#231b38;
+  --summer:#9b5cff; --winter:#5a3aa6; --off:#271d44; --grid:#7a86a3; --warn:#ff8a80; --on-accent:#ffffff;
 }
 *,*::before,*::after{box-sizing:inherit}
 html{scroll-padding-top:env(safe-area-inset-top,0px)}
@@ -98,7 +98,7 @@ button{cursor:pointer}
 .charge{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:14px;margin-bottom:26px}
 .charge .why{font-size:.9rem;color:var(--muted);margin:2px 0 12px}
 .charge .why strong{color:var(--ink);font-weight:600}
-.bigbtn{width:100%;border:0;border-radius:12px;padding:14px;font-weight:600;font-size:1.05rem;background:var(--summer);color:#16240a}
+.bigbtn{width:100%;border:0;border-radius:12px;padding:14px;font-weight:600;font-size:1.05rem;background:var(--summer);color:var(--on-accent);box-shadow:0 6px 20px -8px var(--summer)}
 .bigbtn.back{background:var(--ink);color:var(--bg)}
 .bigbtn:disabled{opacity:.45;cursor:default}
 .banner{margin-top:10px;font-size:.88rem;padding:10px 12px;border-radius:10px;background:var(--off)}
@@ -183,58 +183,105 @@ label input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px
 .row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
 .test{font-size:.9rem;margin:8px 0 4px;min-height:1.3em}
 @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+
+/* ---------- Kopfzeile & Menü ---------- */
+.top{position:sticky;top:env(safe-area-inset-top,0px);z-index:20;display:flex;align-items:center;justify-content:space-between;gap:12px;
+  max-width:560px;margin:0 auto;padding:10px 16px;background:var(--bg)}
+body::before{content:"";position:fixed;inset:0 0 auto;height:env(safe-area-inset-top,0px);z-index:21;background:var(--bg)}
+.brand h1{font-size:1.25rem;line-height:1.2}
+.chip{display:inline-flex;align-items:center;gap:6px;margin-top:3px;font-size:.84rem;color:var(--muted)}
+.chip i{width:8px;height:8px;border-radius:50%;background:var(--grid);flex:none}
+.chip.summer i{background:var(--summer)} .chip.winter i{background:var(--winter)}
+.chip strong{color:var(--ink);font-weight:600}
+.burger{width:44px;height:44px;border:1px solid var(--line);border-radius:12px;background:var(--panel);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;flex:none}
+.burger span{display:block;width:18px;height:2px;border-radius:1px;background:var(--ink)}
+main{padding-top:4px}
+
+dialog.drawer{margin:0 0 0 auto;height:100%;max-height:100%;width:min(320px,86vw);max-width:none;border-radius:16px 0 0 16px;padding:0}
+dialog.drawer[open]{animation:slideIn .22s ease-out}
+@keyframes slideIn{from{transform:translateX(100%)}to{transform:none}}
+.drawer-in{padding:calc(14px + env(safe-area-inset-top,0px)) 14px calc(14px + env(safe-area-inset-bottom,0px))}
+.drawer-head{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.drawer-head h2{margin:0;font-size:1.15rem}
+.x{width:40px;height:40px;border:0;background:none;font-size:1.6rem;line-height:1;color:var(--muted)}
+.menu-list{display:flex;flex-direction:column;gap:4px}
+.menu-list button{display:flex;align-items:center;gap:12px;width:100%;text-align:left;border:0;background:none;padding:12px 10px;border-radius:10px;font-size:1.02rem}
+.menu-list button:hover,.menu-list button:focus-visible{background:var(--bg)}
+.menu-list .ic{width:30px;height:30px;border-radius:8px;background:var(--bg);display:inline-flex;align-items:center;justify-content:center;font-size:.95rem}
+dialog.sheet{width:min(560px,calc(100% - 20px))}
+
+/* ---------- Karten & Klappbereiche ---------- */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:16px}
+.costs .total{margin-top:8px}
+.parts{color:var(--muted);font-size:.92rem;margin-bottom:4px}
+.parts strong{color:var(--ink);font-weight:600}
+.costs .bars-x{margin-bottom:2px}
+.live{margin-bottom:16px}
+.charge{padding-bottom:6px}
+.linkrow{display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:10px;padding:12px 2px;border:0;border-top:1px solid var(--line);background:none;font-weight:500}
+.linkrow .num{color:var(--muted);font-weight:400}
+.linkrow .num::after{content:" ›";color:var(--muted)}
+details.fold>summary{cursor:pointer;list-style:none;display:flex;justify-content:space-between;align-items:center;gap:10px;font-weight:600;padding:12px 2px}
+details.fold>summary::-webkit-details-marker{display:none}
+details.fold>summary::after{content:"";flex:none;width:8px;height:8px;margin-left:4px;border-right:2px solid var(--muted);border-bottom:2px solid var(--muted);transform:rotate(45deg);transition:transform .2s}
+details.fold[open]>summary::after{transform:rotate(-135deg)}
+details.fold>summary .sumval{margin-left:auto;font-weight:400;color:var(--muted);font-size:.9rem}
+.charge details.fold{border-top:1px solid var(--line)}
+.charge .plan{margin:0;border:0;padding:0}
+details.card{padding:2px 14px}
+details.card[open]{padding-bottom:14px}
+details.card .tar{padding-left:0;padding-right:0}
+details.card .tar.sum{background:none;border-top:2px solid var(--line)}
+details.card .sessions{border:0;margin:0;background:none}
+details.card .sessions li{padding-left:0;padding-right:0}
+.more .foot,#moreBody .foot{padding:10px 0 0;border-top:1px solid var(--line);font-size:.82rem;color:var(--muted)}
+.peak{padding:12px 0;border-top:1px solid var(--line)}
+.peak .name{font-weight:600}
+.peak .meta{font-size:.88rem;color:var(--muted)}
+
+/* ---------- Ladestand ---------- */
+.soc{margin-top:10px}
+.soc .bar{height:10px;border-radius:5px;background:var(--track);overflow:hidden}
+.soc .bar i{display:block;height:100%;background:var(--summer);transition:width .9s ease}
+.soc .lbl{display:flex;justify-content:space-between;font-size:.86rem;color:var(--muted);margin-top:5px}
+.soc .lbl strong{color:var(--ink);font-weight:600;font-size:1rem}
+
+/* ---------- Einstellungsseiten ---------- */
+.toggle{display:flex;justify-content:space-between;align-items:center;gap:12px;padding:10px 0;border-bottom:1px solid var(--line)}
+.toggle small{display:block;font-size:.8rem;color:var(--muted)}
+.tariffbox{margin:12px 0;padding:12px;border-radius:10px;background:var(--bg);font-size:.9rem}
+.tariffbox table{width:100%;border-collapse:collapse}
+.tariffbox td{padding:3px 0}
+.tariffbox td:last-child{text-align:right;font-variant-numeric:tabular-nums}
+.tariffbox .sumrow td{border-top:1px solid var(--line);padding-top:6px;font-weight:600}
+.tariffbox .src{margin-top:8px;font-size:.8rem;color:var(--muted)}
+.tariffbox .warn{margin-top:8px;font-size:.84rem}
+.ampbig{text-align:center;margin:8px 0 4px}
+.ampbig span{font-size:2.6rem;font-weight:700;line-height:1}
+.ampbig small{display:block;color:var(--muted)}
+input[type=range]{width:100%;accent-color:var(--summer)}
+.ampscale{display:flex;justify-content:space-between;font-size:.78rem;color:var(--muted)}
+.presets{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:8px;margin-top:12px}
+.presets .btn{padding:8px 6px;font-weight:500;line-height:1.2}
+.presets .btn small{display:block;font-weight:400;color:var(--muted);font-size:.78rem}
+.presets .btn.on{border-color:var(--summer);box-shadow:inset 0 0 0 1px var(--summer)}
+
+.row label{display:flex;flex-direction:column;justify-content:flex-end}
+.row label input{margin-top:4px}
 </style>
 </head>
 <body>
+<header class="top">
+  <div class="brand">
+    <h1>Ladekosten</h1>
+    <div class="chip num" id="tariffChip"></div>
+  </div>
+  <button class="burger" id="menuBtn" aria-label="Menü öffnen" aria-haspopup="dialog"><span></span><span></span><span></span></button>
+</header>
 <main>
-  <section class="day" aria-label="Tarif heute">
-    <div class="dial">
-      <svg id="dial" viewBox="0 0 240 240" role="img" aria-label="24-Stunden-Uhr mit günstigem Zeitfenster"></svg>
-      <div class="center">
-        <div class="time num" id="clock"></div>
-        <h1 id="tariffNow">Normaltarif</h1>
-        <div class="count num" id="countdown"></div>
-      </div>
-    </div>
-    <div class="tariff-line" id="tariffLine"></div>
-  </section>
-
   <div id="msg"></div>
 
-  <section class="live" aria-label="Wallbox live">
-    <div id="statusCell"><div class="wave" aria-hidden="true"></div><div class="k">Status</div><div class="v" id="carState">–</div></div>
-    <div><div class="k">Leistung<span class="live-dot" id="liveDot" title="Live-Aktualisierung"></span></div>
-      <div class="gauge">
-        <svg viewBox="0 0 120 66" aria-hidden="true">
-          <path class="trk" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke-width="10" stroke-linecap="round"/>
-          <path class="val" id="gaugeVal" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
-        </svg>
-        <div class="read"><div class="v num" id="power">–</div><div class="of num">von 11 kW</div></div>
-      </div>
-      <svg class="spark" id="spark" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true"><polyline id="sparkLine" fill="none" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke" points=""/></svg>
-    </div>
-    <div class="wide"><div class="k">Aktuelle Ladung</div><div class="v num" id="curSession">Kein Auto angesteckt</div></div>
-  </section>
-
-  <section class="charge" aria-label="Laden steuern">
-    <h2>Laden</h2>
-    <div class="why" id="why">Verbinde die Wallbox in den Einstellungen, um das Laden zu steuern.</div>
-    <button class="bigbtn" id="chargeBtn" disabled>Jetzt laden</button>
-    <div id="manualBanner"></div>
-
-    <div class="plan">
-      <h3>Ladeplan</h3>
-      <div class="why" style="margin-bottom:6px">Ist ein Tag aktiv, lädt die Wallbox an diesem Tag nur im eingestellten Zeitfenster. Ein inaktiver Tag bedeutet: Laden jederzeit erlaubt.</div>
-      <div id="planRows"></div>
-      <div class="actions">
-        <button class="btn primary" id="planSave" disabled>Ladeplan speichern</button>
-        <button class="btn" id="planSun">Sonnen-Zeiten übernehmen</button>
-      </div>
-      <div class="out" id="planOut"></div>
-    </div>
-  </section>
-
-  <section aria-label="Kostenübersicht">
+  <section class="card costs" aria-label="Kostenübersicht">
     <div class="period">
       <select id="periodSel" aria-label="Zeitraum">
         <option value="month">Monat</option>
@@ -248,34 +295,82 @@ label input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px
       </div>
     </div>
     <div class="total num" id="pCost">0,00 €</div>
+    <div class="parts num" id="pParts"></div>
     <div class="sub num" id="pSub"></div>
     <div class="split" id="pSplit"></div>
     <div class="legend"><span><b style="background:var(--summer)"></b>Sommersonne</span><span><b style="background:var(--winter)"></b>Wintersonne</span><span><b style="background:var(--grid)"></b>Normaltarif</span></div>
     <div class="bars-wrap"><div class="bars" id="bars"></div></div>
     <div class="bars-x num" id="barsX"></div>
-
-    <details class="more" id="more">
-      <summary>Erweiterte Details</summary>
-      <div id="moreBody"></div>
-    </details>
-
-    <h2>Ladevorgänge</h2>
-    <ul class="sessions" id="sessions"></ul>
   </section>
 
-  <div class="actions">
-    <button class="btn primary" id="openSettings">Einstellungen</button>
-    <button class="btn" id="refresh">Jetzt aktualisieren</button>
-    <button class="btn" id="exportCsv">CSV exportieren</button>
-  </div>
-  <p class="note">Ladebeginn, Ladeende und Energie kommen direkt von der Wallbox. Ist die Aufzeichnung im Hintergrund eingerichtet, schreibt Netlify die Wallbox alle 5 Minuten mit, auch wenn die App geschlossen ist. Beim nächsten Öffnen holt die App diese Messungen ab. Ohne Hintergrund-Aufzeichnung kennt die App bei mehreren Ladungen zwischen zwei Öffnungen den genauen Zeitpunkt der früheren Ladungen nicht und kennzeichnet sie mit „ohne App erfasst“.</p>
+  <section class="live" aria-label="Wallbox live">
+    <div id="statusCell"><div class="wave" aria-hidden="true"></div><div class="k">Status</div><div class="v" id="carState">–</div></div>
+    <div><div class="k">Leistung<span class="live-dot" id="liveDot" title="Live-Aktualisierung"></span></div>
+      <div class="gauge">
+        <svg viewBox="0 0 120 66" aria-hidden="true">
+          <path class="trk" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke-width="10" stroke-linecap="round"/>
+          <path class="val" id="gaugeVal" d="M10 60 A50 50 0 0 1 110 60" fill="none" stroke-width="10" stroke-linecap="round" pathLength="100" stroke-dasharray="0 100"/>
+        </svg>
+        <div class="read"><div class="v num" id="power">–</div><div class="of num" id="powerOf">von 11 kW</div></div>
+      </div>
+      <svg class="spark" id="spark" viewBox="0 0 120 26" preserveAspectRatio="none" aria-hidden="true"><polyline id="sparkLine" fill="none" stroke-width="1.6" stroke-linejoin="round" vector-effect="non-scaling-stroke" points=""/></svg>
+    </div>
+    <div class="wide"><div class="k">Aktuelle Ladung</div><div class="v num" id="curSession">Kein Auto angesteckt</div><div id="socBox"></div></div>
+  </section>
+
+  <section class="card charge" aria-label="Laden steuern">
+    <div class="why" id="why">Verbinde die Wallbox im Menü, um das Laden zu steuern.</div>
+    <button class="bigbtn" id="chargeBtn" disabled>Jetzt laden</button>
+    <div id="manualBanner"></div>
+    <button class="linkrow" id="powerRow" type="button"><span>Ladeleistung</span><span class="num" id="powerRowVal">–</span></button>
+    <details class="fold" id="planFold">
+      <summary><span>Ladeplan</span><span class="sumval num" id="planSummary"></span></summary>
+      <div class="foldbody">
+        <div class="why" style="margin-bottom:6px">Ist ein Tag aktiv, lädt die Wallbox an diesem Tag nur im eingestellten Zeitfenster. Ein inaktiver Tag bedeutet: Laden jederzeit erlaubt.</div>
+        <div id="planRows"></div>
+        <div class="actions">
+          <button class="btn primary" id="planSave" disabled>Ladeplan speichern</button>
+          <button class="btn" id="planSun">Sonnen-Zeiten übernehmen</button>
+        </div>
+        <div class="out" id="planOut"></div>
+      </div>
+    </details>
+  </section>
+
+  <details class="fold card" id="more">
+    <summary><span>Erweiterte Details</span></summary>
+    <div id="moreBody"></div>
+  </details>
+
+  <details class="fold card" id="sesFold">
+    <summary><span>Ladevorgänge</span><span class="sumval num" id="sesCount"></span></summary>
+    <ul class="sessions" id="sessions"></ul>
+  </details>
+
+  <p class="note">Ladebeginn, Ladeende und Energie kommen direkt von der Wallbox. Ist die Aufzeichnung im Hintergrund eingerichtet, schreibt Netlify die Wallbox alle 5 Minuten mit, auch wenn die App geschlossen ist. Ohne Hintergrund-Aufzeichnung werden mehrere Ladungen zwischen zwei Öffnungen der App mit „ohne App erfasst“ gekennzeichnet.</p>
 </main>
+
+<!-- Menü -->
+<dialog id="menu" class="drawer">
+  <form method="dialog" class="drawer-in">
+    <div class="drawer-head"><h2>Menü</h2><button class="x" value="close" aria-label="Menü schließen">×</button></div>
+    <nav class="menu-list">
+      <button type="button" data-open="dlgTarif"><span class="ic">€</span>Stromtarif</button>
+      <button type="button" data-open="dlgNetz"><span class="ic">⚡</span>Netzkosten</button>
+      <button type="button" data-open="dlgPower"><span class="ic">↕</span>Ladeleistung</button>
+      <button type="button" data-open="dlgCar"><span class="ic">🚗</span>Fahrzeug</button>
+      <button type="button" data-open="dlgWallbox"><span class="ic">⚙</span>Einstellungen</button>
+      <button type="button" id="exportCsv"><span class="ic">⇩</span>CSV exportieren</button>
+      <button type="button" id="refresh"><span class="ic">⟳</span>Jetzt aktualisieren</button>
+    </nav>
+  </form>
+</dialog>
 
 <dialog id="confirmDlg">
   <form class="dlg confirm" method="dialog">
     <h2>Außerhalb des Ladeplans laden?</h2>
     <p id="confirmText"></p>
-    <p class="hint" style="margin:0 0 14px">Die Ladung läuft, bis du „Zurück zum Ladeplan“ tippst. Steckst du das Auto ab, stellt die App den Ladeplan wieder her, sobald sie das nächste Mal geöffnet ist.</p>
+    <p class="hint" style="margin:0 0 14px">Die Ladung läuft, bis du „Zurück zum Ladeplan“ tippst. Steckst du das Auto ab, stellt die App den Ladeplan wieder her, sobald sie das Abstecken bemerkt.</p>
     <div class="actions">
       <button class="btn primary" value="yes">Ja, jetzt laden</button>
       <button class="btn" value="no">Abbrechen</button>
@@ -283,7 +378,8 @@ label input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px
   </form>
 </dialog>
 
-<dialog id="settings">
+<!-- Einstellungen: Wallbox & Hintergrund -->
+<dialog id="dlgWallbox" class="sheet">
   <form class="dlg" method="dialog">
     <h2>Einstellungen</h2>
     <fieldset>
@@ -300,6 +396,19 @@ label input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px
       <div class="actions"><button type="button" class="btn" id="keyGen">Schlüssel erzeugen</button><button type="button" class="btn" id="keyTest">Hintergrund prüfen</button></div>
       <div class="test" id="keyOut"></div>
     </fieldset>
+    <div class="actions">
+      <button class="btn primary" value="save">Speichern</button>
+      <button class="btn" value="cancel" formnovalidate>Abbrechen</button>
+      <button class="btn danger" type="button" id="resetBtn">Ladedaten löschen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Stromtarif -->
+<dialog id="dlgTarif" class="sheet">
+  <form class="dlg" method="dialog">
+    <h2>Stromtarif</h2>
+    <p class="hint">Energiepreise deines Stromlieferanten, brutto. Die Netzkosten stellst du unter „Netzkosten“ ein.</p>
     <fieldset>
       <legend>Normaltarif</legend>
       <label>Preis (ct/kWh, brutto)<input id="fNormal" type="text" inputmode="decimal" placeholder="z.B. 22,50"></label>
@@ -328,7 +437,73 @@ label input{display:block;width:100%;margin-top:4px;padding:10px 12px;border:1px
     <div class="actions">
       <button class="btn primary" value="save">Speichern</button>
       <button class="btn" value="cancel" formnovalidate>Abbrechen</button>
-      <button class="btn danger" type="button" id="resetBtn">Ladedaten löschen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Netzkosten -->
+<dialog id="dlgNetz" class="sheet">
+  <form class="dlg" method="dialog">
+    <h2>Netzkosten</h2>
+    <p class="hint">Nur die Bestandteile, die pro geladener kWh anfallen. Pauschale und Messentgelt fallen unabhängig vom Laden an und sind deshalb nicht enthalten.</p>
+    <div class="toggle"><span>Netzkosten einrechnen</span><label class="sw"><input type="checkbox" id="fNetOn"><span></span></label></div>
+    <div class="toggle"><span>Smart Meter vorhanden<small>für den günstigeren Sommer-Netztarif</small></span><label class="sw"><input type="checkbox" id="fNetSmart"><span></span></label></div>
+    <div class="toggle"><span>inkl. 20 % USt.</span><label class="sw"><input type="checkbox" id="fNetUst"><span></span></label></div>
+    <div class="tariffbox" id="netBox"></div>
+    <div class="actions"><button type="button" class="btn" id="netUpdate">Netztarife aktualisieren</button></div>
+    <div class="test" id="netOut"></div>
+    <fieldset>
+      <legend>Leistungspreis ab 2027 (Vorschau)</legend>
+      <p class="hint">Ab 2027 zählt zusätzlich die höchste 15-Minuten-Leistung im Monat, über 10 kW zu einem höheren Satz. Netz OÖ legt den Starttermin zwischen Jänner 2027 und Juli 2028 fest, die Preise stehen noch nicht fest. Vorbelegt sind die Richtwerte der E-Control.</p>
+      <div class="row">
+        <label>bis 10 kW (€/kW/Jahr)<input id="fLpLow" type="text" inputmode="decimal"></label>
+        <label>über 10 kW (€/kW/Jahr)<input id="fLpHigh" type="text" inputmode="decimal"></label>
+      </div>
+    </fieldset>
+    <div class="actions">
+      <button class="btn primary" value="save">Speichern</button>
+      <button class="btn" value="cancel" formnovalidate>Abbrechen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Ladeleistung -->
+<dialog id="dlgPower" class="sheet">
+  <form class="dlg" method="dialog">
+    <h2>Ladeleistung</h2>
+    <p class="hint">Begrenzt den Ladestrom der Wallbox. Weniger Leistung heißt eine niedrigere Spitze für den künftigen Leistungspreis, aber eine längere Ladedauer.</p>
+    <div class="ampbig num"><span id="ampKw">–</span><small id="ampA"></small></div>
+    <input type="range" id="ampRange" min="6" max="16" step="1" aria-label="Ladestrom in Ampere">
+    <div class="ampscale num"><span>4,1 kW</span><span>11 kW</span></div>
+    <div class="presets">
+      <button type="button" class="btn" data-amp="16">Maximal<small>11,0 kW</small></button>
+      <button type="button" class="btn" data-amp="14">Unter 10 kW<small>9,7 kW</small></button>
+      <button type="button" class="btn" data-amp="10">Sanft<small>6,9 kW</small></button>
+    </div>
+    <div class="tariffbox" id="ampInfo"></div>
+    <div class="test" id="ampOut"></div>
+    <div class="actions">
+      <button type="button" class="btn primary" id="ampApply">An die Wallbox senden</button>
+      <button class="btn" value="cancel" formnovalidate>Schließen</button>
+    </div>
+  </form>
+</dialog>
+
+<!-- Fahrzeug -->
+<dialog id="dlgCar" class="sheet">
+  <form class="dlg" method="dialog">
+    <h2>Fahrzeug</h2>
+    <label>Bezeichnung<input id="fCarName" autocomplete="off" placeholder="z.B. Cupra Tavascan"></label>
+    <div class="row">
+      <label>Akkukapazität netto (kWh)<input id="fCarCap" type="text" inputmode="decimal"></label>
+      <label>max. AC-Ladeleistung (kW)<input id="fCarAc" type="text" inputmode="decimal"></label>
+      <label>Ø Verbrauch (kWh/100 km)<input id="fCarCons" type="text" inputmode="decimal" placeholder="z.B. 18,5"></label>
+      <label>Ladeverluste (%)<input id="fCarLoss" type="text" inputmode="decimal"></label>
+    </div>
+    <p class="hint">Mit der Akkukapazität zeigt die App während der Ladung, wie viel Prozent nachgeladen wurden. Die Ladeverluste ziehen ab, was zwischen Wallbox und Akku verloren geht (beim Wechselstromladen meist 8–12 %).</p>
+    <div class="actions">
+      <button class="btn primary" value="save">Speichern</button>
+      <button class="btn" value="cancel" formnovalidate>Abbrechen</button>
     </div>
   </form>
 </dialog>
@@ -338,6 +513,8 @@ const KEY='goe-ladekosten-v1';
 const DEF={settings:{serial:'',token:'',normal:null,
   cheap:4.99,mFrom:4,mTo:9,hFrom:10,hTo:16,          /* Sommersonne */
   wPrice:null,wMFrom:10,wMTo:3,wHFrom:10,wHTo:16},   /* Wintersonne */
+  netz:{on:true,smart:true,ust:true,lpLow:19,lpHigh:38},
+  car:{name:'Cupra Tavascan',cap:77,ac:11,cons:null,loss:10},
   last:null,days:{},sessions:[],cur:null,period:'month'};
 const clone=o=>JSON.parse(JSON.stringify(o));
 
@@ -347,7 +524,7 @@ let view=new Date(); view.setDate(1);
 let live=null, timer=null, lastErr='';
 
 function load(){
-  try{const r=localStorage.getItem(KEY); if(r){const o=JSON.parse(r); return {...clone(DEF),...o,settings:{...DEF.settings,...o.settings}};}}catch(e){}
+  try{const r=localStorage.getItem(KEY); if(r){const o=JSON.parse(r); return {...clone(DEF),...o,settings:{...DEF.settings,...o.settings},netz:{...DEF.netz,...(o.netz||{})},car:{...DEF.car,...(o.car||{})}};}}catch(e){}
   return {...clone(DEF),v:2,archive:{}};
 }
 function save(){try{localStorage.setItem(KEY,JSON.stringify(S));}catch(e){}}
@@ -559,7 +736,7 @@ function setKeys(obj){
     return j;
   });
 }
-const FILTER='car,eto,nrg,wh,frc,modelStatus,trx,sch_week,sch_satur,sch_sund,rbt,lccfi,lcctc,lccfc';
+const FILTER='car,eto,nrg,wh,frc,modelStatus,trx,amp,sch_week,sch_satur,sch_sund,rbt,lccfi,lcctc,lccfc';
 function fetchStatus(serial,token,filter=FILTER){
   serial=String(serial).trim(); token=String(token).trim();
   return queued(async()=>{
@@ -623,11 +800,11 @@ async function poll(){
 }
 
 /* ---------- Leistung live ---------- */
-const MAXW=11000, HIST=[]; let shownW=0, tween=null, fastBusy=false;
-function powerColor(w){const f=Math.max(0,Math.min(1,w/MAXW)); const dark=matchMedia('(prefers-color-scheme: dark)').matches; return `hsl(${Math.round(f*120)} 78% ${dark?55:44}%)`;}
+const maxW=()=>Math.min(22,Math.max(3.7,isNum(S.car.ac)?S.car.ac:11))*1000, HIST=[]; let shownW=0, tween=null, fastBusy=false;
+function powerColor(w){const f=Math.max(0,Math.min(1,w/maxW())); const dark=matchMedia('(prefers-color-scheme: dark)').matches; return `hsl(${Math.round((360-f*95)%360)} ${dark?85:75}% ${dark?62:50}%)`;}
 function setPower(w){
   if(w==null){$('power').textContent='–';return;}
-  w=Math.max(0,w); const col=powerColor(w), pct=Math.min(100,w/MAXW*100);
+  w=Math.max(0,w); const col=powerColor(w), pct=Math.min(100,w/maxW()*100);
   const g=$('gaugeVal'); g.setAttribute('stroke-dasharray',`${pct.toFixed(1)} 100`); g.style.stroke=col;
   /* Zahl weich hochzählen */
   cancelAnimationFrame(tween); const from=shownW, t0=performance.now(), D=800;
@@ -635,7 +812,7 @@ function setPower(w){
   tween=requestAnimationFrame(step);
   const last=HIST[HIST.length-1];
   if(!last||Date.now()-last.t>2000) HIST.push({t:Date.now(),w}); while(HIST.length>60) HIST.shift();
-  const pts=HIST.map((h,i)=>`${(HIST.length<2?120:i/(HIST.length-1)*120).toFixed(1)},${(24-Math.min(1,h.w/MAXW)*22).toFixed(1)}`).join(' ');
+  const pts=HIST.map((h,i)=>`${(HIST.length<2?120:i/(HIST.length-1)*120).toFixed(1)},${(24-Math.min(1,h.w/maxW())*22).toFixed(1)}`).join(' ');
   const pl=$('sparkLine'); pl.setAttribute('points',HIST.length<2?`0,${pts.split(',')[1]} ${pts}`:pts); pl.style.stroke=col;
 }
 /* Solange geladen wird: alle 5 Sekunden nur die Leistung abfragen */
@@ -656,65 +833,6 @@ setInterval(fastPoll,5000);
 function startPolling(){clearInterval(timer); poll(); timer=setInterval(()=>{if(document.visibilityState==='visible')poll();},30000);}
 document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='visible')poll();});
 
-/* ---------- 24-Stunden-Ring (0 Uhr unten, 12 Uhr oben) ---------- */
-const CX=120,CY=120,R=98;
-function pt(h,r){const a=(h/24)*2*Math.PI+Math.PI;return [CX+r*Math.sin(a),CY-r*Math.cos(a)];}
-function arc(h0,h1,r){
-  const span=((h1-h0)%24+24)%24||24;
-  if(span>=24) return `M ${CX} ${CY-r} A ${r} ${r} 0 1 1 ${CX-0.01} ${CY-r}`;
-  const [x0,y0]=pt(h0,r),[x1,y1]=pt(h0+span,r);
-  return `M ${x0.toFixed(2)} ${y0.toFixed(2)} A ${r} ${r} 0 ${span>12?1:0} 1 ${x1.toFixed(2)} ${y1.toFixed(2)}`;
-}
-function drawDial(now,win,inSeason){
-  const h=now.getHours()+now.getMinutes()/60;
-  let t='';
-  for(let i=0;i<24;i++){
-    const major=i%6===0, [x,y]=pt(i,80);
-    if(major){const [lx,ly]=pt(i,78);t+=`<text x="${lx}" y="${ly}" text-anchor="middle" dominant-baseline="central" font-size="11" font-family="Barlow Semi Condensed, Barlow, sans-serif" fill="var(--muted)">${i}</text>`;}
-    else t+=`<circle cx="${x.toFixed(2)}" cy="${y.toFixed(2)}" r="1.4" fill="var(--muted)" opacity=".55"/>`;
-  }
-  const col=inSeason?`var(--${win.id})`:'var(--off)';
-  const [kx,ky]=pt(h,R);
-  $('dial').innerHTML=
-    `<circle cx="${CX}" cy="${CY}" r="${R}" fill="none" stroke="var(--track)" stroke-width="16"/>`+
-    `<path d="${arc(win.hFrom,win.hTo,R)}" fill="none" stroke="${col}" stroke-width="16" stroke-linecap="round"/>`+
-    t+
-    `<circle cx="${kx.toFixed(2)}" cy="${ky.toFixed(2)}" r="12" fill="var(--panel)"/>`+
-    `<circle cx="${kx.toFixed(2)}" cy="${ky.toFixed(2)}" r="7.5" fill="var(--ink)"/>`;
-}
-function until(now,hour){const t=new Date(now);t.setHours(hour,0,0,0);if(t<=now)t.setDate(t.getDate()+1);return t-now;}
-function short(ms){const m=Math.round(ms/60000);return m<60?`${m} min`:`${Math.floor(m/60)} h ${pad(m%60)} min`;}
-
-/* ---------- Auswertung ---------- */
-const MON=['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
-function periodPrefix(){const y=view.getFullYear(),m=view.getMonth();return S.period==='month'?`${y}-${pad(m+1)}-`:S.period==='year'?`${y}-`:'';}
-function allSplits(){
-  if(S.v!==2) return Object.entries(S.days||{}).map(([k,D])=>{const cc=isNum(D.cc)?D.cc:D.c/1000*S.settings.cheap,cw=isNum(D.cw)?D.cw:0;return [k,{c:D.c,w:D.w||0,n:D.n,e:D.e||0,cc,cw,cn:isNum(D.cn)?D.cn:Math.max(0,D.cost-cc-cw)}];});
-  const out=[]; const add=o=>{for(const e of Object.entries(o||{})) out.push(e);};
-  if(S.cur) add(S.cur.split); S.sessions.forEach(s=>add(s.split)); add(S.archive);
-  return out;
-}
-let SPLITS=[];
-function sumDays(prefix){
-  const A={c:0,w:0,n:0,e:0,cost:0,cc:0,cw:0,cn:0};
-  for(const[k,D]of SPLITS) if(k.startsWith(prefix)){A.c+=D.c;A.w+=D.w;A.n+=D.n;A.e+=D.e;A.cc+=D.cc;A.cw+=D.cw;A.cn+=D.cn;A.cost+=D.cc+D.cw+D.cn;}
-  return A;
-}
-function barsData(){
-  const y=view.getFullYear(),m=view.getMonth();
-  if(S.period==='month'){const n=new Date(y,m+1,0).getDate();return Array.from({length:n},(_,i)=>({lbl:`${i+1}.`,t:`${i+1}.`,...sumDays(`${y}-${pad(m+1)}-${pad(i+1)}`)}));}
-  if(S.period==='year') return MON.map((l,i)=>({lbl:l.charAt(0),t:l,...sumDays(`${y}-${pad(i+1)}-`)}));
-  const ys=SPLITS.map(([k])=>+k.slice(0,4)); const a=ys.length?Math.min(...ys):y, b=Math.max(y,...ys);
-  return Array.from({length:b-a+1},(_,i)=>({lbl:String(a+i),t:String(a+i),...sumDays(`${a+i}-`)}));
-}
-function sessionsInPeriod(){
-  const y=view.getFullYear(),m=view.getMonth();
-  return S.sessions.filter(s=>{const d=new Date(s.start);return S.period==='all'||(d.getFullYear()===y&&(S.period==='year'||d.getMonth()===m));});
-}
-const pct=(a,t)=>Math.round(a/t*100);
-function shares(s,w,tot){const p=[];if(s>0)p.push(`${pct(s,tot)} % Sommersonne`);if(w>0)p.push(`${pct(w,tot)} % Wintersonne`);return p.join(', ');}
-
-/* ---------- Anzeige ---------- */
 /* ---------- Ladeplan & manuelles Laden ---------- */
 const PLAN=[{key:'sch_week',lbl:'Mo–Fr',days:[1,2,3,4,5]},{key:'sch_satur',lbl:'Sa',days:[6]},{key:'sch_sund',lbl:'So',days:[0]}];
 const t2s=t=>t?`${pad(t.hour)}:${pad(t.minute)}`:'00:00';
@@ -730,8 +848,17 @@ function inPlan(date){
 }
 const MS={2:'wartet auf Freigabe (RFID)',3:'manuell gestartet',4:'Laden ist gesperrt',5:'wartet auf das Zeitfenster im Ladeplan',6:'Energielimit erreicht',7:'wegen günstigem Preis',12:'mit PV-Überschuss',14:'laut Ladeplan'};
 
+function planText(){
+  if(!live||!PLAN.every(p=>validSch(live[p.key]))) return '';
+  const txt=o=>o.control===1?`${t2s(o.ranges[0].begin)}–${t2s(o.ranges[0].end)}`.replace(/:00/g,''):'frei';
+  const [wk,sa,so]=PLAN.map(p=>txt(live[p.key]));
+  if(wk===sa&&sa===so) return wk==='frei'?'jederzeit':`täglich ${wk}`;
+  return sa===so?`Mo–Fr ${wk} · Wochenende ${sa}`:`Mo–Fr ${wk} · Sa ${sa} · So ${so}`;
+}
 function renderCharge(){
   const btn=$('chargeBtn'), ok=live&&S.settings.serial&&S.settings.token;
+  $('powerRowVal').textContent=live&&isNum(live.amp)?`max. ${n1.format(live.amp*230*3/1000)} kW (${live.amp} A)`:'–';
+  $('planSummary').textContent=planText();
   if(!ok){btn.disabled=true;$('planSave').disabled=true;$('planRows').innerHTML=planRowsHtml();return;}
   const car=live.car, forced=live.frc===2, plugged=[2,3,4].includes(car);
   const why=MS[live.modelStatus];
@@ -796,45 +923,139 @@ $('chargeBtn').onclick=async()=>{
 cDlg.addEventListener('close',()=>{if(cDlg.returnValue==='yes') startManual();});
 
 const CAR={0:'Unbekannt',1:'Nicht angesteckt',2:'Lädt',3:'Angesteckt',4:'Ladung fertig',5:'Fehler'};
+/* ---------- Netzkosten ---------- */
+const NETZ_DEFAULT={"netzbereich": "Oberösterreich (Netz Oberösterreich GmbH)", "netzebene": "Netzebene 7, Haushalt ohne Leistungsmessung", "stand": "2026-10-16", "quelle": "SNE-V 2018 – Novelle 2026 der E-Control, Preisblatt Netz OÖ ab 01.01.2026", "perioden": [{"ab": "2026-01-01", "status": "amtlich", "arbeitspreis": 6.29, "sommer": {"preis": 5.03, "monate": [4, 9], "stunden": [10, 16], "nurSmartMeter": true}, "verlust": 0.528, "eag": 0.62, "abgabe": 0.1}, {"ab": "2027-01-01", "status": "vorläufig", "hinweis": "Die Netzentgelte 2027 legt die E-Control erst mit der Tarifverordnung fest. Bis dahin gelten hier die Werte von 2026. Die Elektrizitätsabgabe ist nur 2026 auf 0,1 ct gesenkt, regulär beträgt sie 1,5 ct.", "arbeitspreis": 6.29, "sommer": {"preis": 5.03, "monate": [4, 9], "stunden": [10, 16], "nurSmartMeter": true}, "winter": {"preis": null, "monate": [10, 3], "stunden": [23, 5], "ab": "2027-10-01", "nurSmartMeter": true}, "verlust": 0.528, "eag": 0.62, "abgabe": 1.5, "leistungspreis": {"bis10": 19, "ueber10": 38, "einheit": "€/kW/Jahr", "start": null, "hinweis": "Richtwert der E-Control für den Start rund 19 €/kW/Jahr, je Netzbereich etwa 15–26 €. Über 10 kW gilt ein höherer Satz. Netz OÖ führt den Leistungspreis zwischen 1.1.2027 und 1.7.2028 ein."}}]};
+let NETZ=(S.netzTable&&S.netzTable.perioden)?S.netzTable:NETZ_DEFAULT;
+const netCache=new Map();
+const netVer=()=>[NETZ.stand,S.netz.smart,S.netz.ust,S.netz.on].join('|');
+function netPeriod(ts){const k=dayKey(new Date(ts)); let p=NETZ.perioden[0]; for(const q of NETZ.perioden) if(q.ab<=k) p=q; return p;}
+function inWin(d,w){
+  if(!w) return false; const m=d.getMonth()+1,h=d.getHours();
+  const [m0,m1]=w.monate,[h0,h1]=w.stunden;
+  const mOk=m0<=m1?(m>=m0&&m<=m1):(m>=m0||m<=m1), hOk=h0<h1?(h>=h0&&h<h1):(h>=h0||h<h1);
+  return mOk&&hOk;
+}
+/* Netzkosten je kWh zu einem Zeitpunkt, in ct, brutto falls USt. aktiv */
+function netRate(ts,detail){
+  const p=netPeriod(ts), d=new Date(ts), sm=S.netz.smart;
+  let arb=p.arbeitspreis, which='normal';
+  if(p.sommer&&(sm||!p.sommer.nurSmartMeter)&&inWin(d,p.sommer)){arb=p.sommer.preis;which='sommer';}
+  else if(p.winter&&isNum(p.winter.preis)&&(sm||!p.winter.nurSmartMeter)&&dayKey(d)>=p.winter.ab&&inWin(d,p.winter)){arb=p.winter.preis;which='winter';}
+  const f=S.netz.ust?1.2:1, sum=(arb+p.verlust+p.eag+p.abgabe)*f;
+  return detail?{sum,arb:arb*f,verlust:p.verlust*f,eag:p.eag*f,abgabe:p.abgabe*f,which,p}:sum;
+}
+function netCostOf(s){
+  if(!S.netz.on||!s.segs) return {cost:0,byDay:{}};
+  const key=s.id+':'+netVer();
+  if(s!==S.cur&&netCache.has(key)) return netCache.get(key);
+  const byDay={}; let cost=0;
+  for(const g of s.segs){
+    let t=g.t0;
+    while(t<g.t1){const h=new Date(t); h.setMinutes(0,0,0); h.setHours(h.getHours()+1);
+      const e=Math.min(h.getTime(),g.t1), part=g.wh*(e-t)/(g.t1-g.t0), c=part/1000*netRate(t), k=dayKey(new Date(t));
+      byDay[k]=(byDay[k]||0)+c; cost+=c; t=e;}
+  }
+  const r={cost,byDay}; if(s!==S.cur) netCache.set(key,r); return r;
+}
+async function loadNetz(manual){
+  try{
+    const r=await fetch('/netztarife.json',{cache:'no-store'}); if(!r.ok) throw 0;
+    const j=await r.json(); if(!j||!Array.isArray(j.perioden)) throw 0;
+    const changed=JSON.stringify(j)!==JSON.stringify(NETZ);
+    if(changed){NETZ=j; S.netzTable=j; netCache.clear(); save(); render();}
+    return {ok:true,changed};
+  }catch(e){return {ok:false};}
+}
+/* Höchste 15-Minuten-Leistung der Wallbox je Monat (aus den Ladeabschnitten) */
+function peaks(list){
+  const slots=new Map();
+  for(const s of list) for(const g of (s.segs||[])){
+    const Q=15*60e3; let t=g.t0;
+    while(t<g.t1){const q=Math.floor(t/Q)*Q, e=Math.min(q+Q,g.t1), part=g.wh*(e-t)/(g.t1-g.t0); slots.set(q,(slots.get(q)||0)+part); t=e;}
+  }
+  const byMonth={};
+  for(const[q,wh]of slots){const d=new Date(q),k=`${d.getFullYear()}-${pad(d.getMonth()+1)}`, kw=wh*4/1000; if(!byMonth[k]||kw>byMonth[k].kw) byMonth[k]={kw,at:q};}
+  return byMonth;
+}
+function lpMonth(kw){const lo=S.netz.lpLow,hi=S.netz.lpHigh; if(!isNum(lo)) return null; return (Math.min(kw,10)*lo+Math.max(0,kw-10)*(isNum(hi)?hi:lo))/12;}
+
+/* ---------- Fahrzeug ---------- */
+const carCap=()=>isNum(S.car.cap)&&S.car.cap>0?S.car.cap:null;
+const toBatt=wh=>wh/1000*(1-(isNum(S.car.loss)?S.car.loss:10)/100);
+function socPct(wh){const c=carCap(); return c?toBatt(wh)/c*100:null;}
+
+/* ---------- Auswertung ---------- */
+const MON=['Jän','Feb','Mär','Apr','Mai','Jun','Jul','Aug','Sep','Okt','Nov','Dez'];
+function until(now,hour){const t=new Date(now);t.setHours(hour,0,0,0);if(t<=now)t.setDate(t.getDate()+1);return t-now;}
+function short(ms){const m=Math.round(ms/60000);return m<60?`${m} min`:`${Math.floor(m/60)} h ${pad(m%60)} min`;}
+function periodPrefix(){const y=view.getFullYear(),m=view.getMonth();return S.period==='month'?`${y}-${pad(m+1)}-`:S.period==='year'?`${y}-`:'';}
+function allSplits(){
+  const out=[]; const add=o=>{for(const e of Object.entries(o||{})) out.push(e);};
+  if(S.cur) add(S.cur.split); S.sessions.forEach(s=>add(s.split)); add(S.archive);
+  return out;
+}
+let SPLITS=[], NETDAYS={};
+function sumDays(prefix){
+  const A={c:0,w:0,n:0,e:0,cost:0,cc:0,cw:0,cn:0,net:0};
+  for(const[k,D]of SPLITS) if(k.startsWith(prefix)){A.c+=D.c;A.w+=D.w;A.n+=D.n;A.e+=D.e;A.cc+=D.cc;A.cw+=D.cw;A.cn+=D.cn;A.cost+=D.cc+D.cw+D.cn;}
+  for(const k in NETDAYS) if(k.startsWith(prefix)) A.net+=NETDAYS[k];
+  A.total=A.cost+A.net; return A;
+}
+function barsData(){
+  const y=view.getFullYear(),m=view.getMonth();
+  if(S.period==='month'){const n=new Date(y,m+1,0).getDate();return Array.from({length:n},(_,i)=>({lbl:`${i+1}.`,t:`${i+1}.`,...sumDays(`${y}-${pad(m+1)}-${pad(i+1)}`)}));}
+  if(S.period==='year') return MON.map((l,i)=>({lbl:l.charAt(0),t:l,...sumDays(`${y}-${pad(i+1)}-`)}));
+  const ys=SPLITS.map(([k])=>+k.slice(0,4)); const a=ys.length?Math.min(...ys):y, b=Math.max(y,...ys);
+  return Array.from({length:b-a+1},(_,i)=>({lbl:String(a+i),t:String(a+i),...sumDays(`${a+i}-`)}));
+}
+function sessionsInPeriod(){
+  const y=view.getFullYear(),m=view.getMonth();
+  return S.sessions.filter(s=>{const d=new Date(s.start);return S.period==='all'||(d.getFullYear()===y&&(S.period==='year'||d.getMonth()===m));});
+}
+const pct=(a,t)=>Math.round(a/t*100);
+function shares(s,w,tot){const p=[];if(s>0)p.push(`${pct(s,tot)} % Sommersonne`);if(w>0)p.push(`${pct(w,tot)} % Wintersonne`);return p.join(', ');}
+const lad=n=>`${n} ${n===1?'Ladung':'Ladungen'}`;
+
 function render(){
   if(S.cur) computeSession(S.cur);
   SPLITS=allSplits();
+  NETDAYS={};
+  for(const s of (S.cur?[S.cur,...S.sessions]:S.sessions)){const r=netCostOf(s); for(const k in r.byDay) NETDAYS[k]=(NETDAYS[k]||0)+r.byDay[k];}
   renderCharge();
   const now=new Date(), st=S.settings, sw=seasonWin(now), active=tariffAt(now.getTime());
-  const shown=sw||windows()[0];
-  drawDial(now,shown,!!sw);
-  $('clock').textContent=hm(now);
-  $('tariffNow').textContent=active?active.name:'Normaltarif';
-  $('countdown').textContent=!sw?'':active?`noch ${short(until(now,sw.hTo))}`:`${sw.name} in ${short(until(now,sw.hFrom))}`;
-  const pn=hasNormal()?n2.format(st.normal):'–';
-  $('tariffLine').innerHTML=!sw
-    ?`Heute gibt es keinen günstigen Zeitraum. ${shown.name} gilt wieder ab ${MON[shown.mFrom-1]}. Jetzt kostet jede kWh <strong>${pn} ct</strong>.`
-    :active?`<strong>${n2.format(sw.price)} ct/kWh</strong> bis ${sw.hTo}:00 Uhr, danach ${pn} ct/kWh.`
-    :`Jetzt <strong>${pn} ct/kWh</strong>. ${sw.name} von ${sw.hFrom} bis ${sw.hTo} Uhr: ${n2.format(sw.price)} ct/kWh.`;
+
+  /* Tarif-Hinweis in der Kopfzeile */
+  const chip=$('tariffChip'), pn=hasNormal()?n2.format(st.normal):'–';
+  chip.className='chip num'+(active?' '+active.id:'');
+  chip.innerHTML=`<i></i>`+(active?`<strong>${active.name}</strong>&nbsp;· noch ${short(until(now,sw.hTo))}`
+    :sw?`<strong>Normaltarif</strong>&nbsp;· ${sw.name} in ${short(until(now,sw.hFrom))}`
+    :`<strong>Normaltarif</strong>&nbsp;· ${pn} ct/kWh`);
 
   let m='';
-  if(!st.serial||!st.token) m=`<div class="msg info">Trage Seriennummer und Cloud-API-Token deiner Wallbox ein, damit die App Ladungen aufzeichnen kann.<br><button class="btn" onclick="openSettings()">Einstellungen öffnen</button></div>`;
-  else if(!hasNormal()) m=`<div class="msg info">Trage noch deinen Normaltarif ein, damit Ladungen außerhalb der günstigen Zeitfenster richtig berechnet werden.<br><button class="btn" onclick="openSettings()">Preis eintragen</button></div>`;
+  if(!st.serial||!st.token) m=`<div class="msg info">Trage Seriennummer und Cloud-API-Token deiner Wallbox ein, damit die App Ladungen aufzeichnen kann.<br><button class="btn" onclick="openDlg('dlgWallbox')">Einstellungen öffnen</button></div>`;
+  else if(!hasNormal()) m=`<div class="msg info">Trage noch deinen Normaltarif ein, damit Ladungen außerhalb der günstigen Zeitfenster richtig berechnet werden.<br><button class="btn" onclick="openDlg('dlgTarif')">Preis eintragen</button></div>`;
   else if(lastErr&&errKind==='action') m=`<div class="msg">${lastErr}</div>`;
-  else if(lastErr&&(errKind==='auth'||errKind==='config')&&fails>=2) m=`<div class="msg">${lastErr}<br><button class="btn" onclick="openSettings()">Einstellungen öffnen</button></div>`;
+  else if(lastErr&&(errKind==='auth'||errKind==='config')&&fails>=2) m=`<div class="msg">${lastErr}<br><button class="btn" onclick="openDlg('dlgWallbox')">Einstellungen öffnen</button></div>`;
   else if(lastErr&&fails>=4) m=`<div class="msg info">${lastErr} Die App versucht es weiter. Es gehen dabei keine Ladungen verloren, sie werden nachgetragen, sobald die Verbindung wieder steht.${lastOk?`<br><small>Letzte Daten um ${hm(new Date(lastOk))} Uhr.</small>`:''}</div>`;
   if(!m){const sp=srvProblem(); if(sp) m=`<div class="msg info">${sp}</div>`;}
   $('msg').innerHTML=m;
 
+  /* Live */
   const sc=$('statusCell');
   if(live){
     const pw=Array.isArray(live.nrg)?(live.nrg[11]||0):0, charging=live.car===2||pw>200, plugged=[3,4].includes(live.car);
     sc.className=charging?'status-charging':plugged?'status-plugged':'';
-  } else sc.className='';
-  if(live){
     $('carState').textContent=CAR[live.car]??'–';
-    const p=Array.isArray(live.nrg)?live.nrg[11]:null;
-    setPower(p);
-  }
-  const C=S.cur;
+    setPower(Array.isArray(live.nrg)?live.nrg[11]:null);
+  } else sc.className='';
+  $('powerOf').textContent=`von ${n1.format(maxW()/1000).replace(',0','')} kW`;
+  const C=S.cur, cNet=C?netCostOf(C).cost:0;
   $('curSession').innerHTML=!C?'Kein Auto angesteckt'
     :!(C.segs&&C.segs.length)?`Angesteckt, lädt noch nicht<small>angesteckt um ${hm(new Date(C.plugIn))}</small>`
-    :`${n2.format(C.wh/1000)} kWh, ${eur.format(C.cost/100)}<small>Ladebeginn ${C.startApprox?'ca. ':''}${hm(new Date(C.start))}${live&&live.car!==2&&C.end?`, Ladeende ${C.endApprox?'ca. ':''}${hm(new Date(C.end))}`:''}</small>`;
+    :`${n2.format(C.wh/1000)} kWh, ${eur.format((C.cost+cNet)/100)}<small>Ladebeginn ${C.startApprox?'ca. ':''}${hm(new Date(C.start))}${live&&live.car!==2&&C.end?`, Ladeende ${C.endApprox?'ca. ':''}${hm(new Date(C.end))}`:''}</small>`;
+  const sp=C&&C.wh>0?socPct(C.wh):null;
+  $('socBox').innerHTML=sp==null?(C&&C.wh>0&&!carCap()?`<div class="soc"><div class="lbl"><span>Trag unter „Fahrzeug“ die Akkukapazität ein, dann siehst du hier den nachgeladenen Anteil.</span></div></div>`:'')
+    :`<div class="soc"><div class="bar"><i style="width:${Math.min(100,sp)}%"></i></div><div class="lbl"><span><strong>+${n1.format(sp)} %</strong> nachgeladen</span><span>${n1.format(toBatt(C.wh))} von ${n1.format(carCap())} kWh${isNum(S.car.cons)&&S.car.cons>0?` · ≈ ${Math.round(toBatt(C.wh)/S.car.cons*100)} km`:''}</span></div></div>`;
 
   /* Zeitraum */
   $('periodSel').value=S.period;
@@ -842,12 +1063,12 @@ function render(){
   $('periodTitle').textContent=S.period==='month'?view.toLocaleDateString('de-AT',{month:'long',year:'numeric'}):String(view.getFullYear());
   const A=sumDays(periodPrefix()), tot=A.c+A.w+A.n;
   const noun=S.period==='month'?'In diesem Monat':S.period==='year'?'In diesem Jahr':'Bisher';
-  $('pCost').textContent=eur.format(A.cost/100);
-  $('pSub').textContent=tot>0?[kwh(tot),`im Schnitt ${n2.format(A.cost/(tot/1000))} ct/kWh`,shares(A.c,A.w,tot),A.e>0?`${kwh(A.e)} geschätzt`:''].filter(Boolean).join(', '):`${noun} wurde noch nichts geladen.`;
+  $('pCost').textContent=eur.format(A.total/100);
+  $('pParts').innerHTML=S.netz.on&&tot>0?`Strom <strong>${eur.format(A.cost/100)}</strong> · Netz <strong>${eur.format(A.net/100)}</strong>`:'';
+  $('pSub').textContent=tot>0?[kwh(tot),`im Schnitt ${n2.format(A.total/(tot/1000))} ct/kWh`,shares(A.c,A.w,tot),A.e>0?`${kwh(A.e)} geschätzt`:''].filter(Boolean).join(', '):`${noun} wurde noch nichts geladen.`;
   $('pSplit').innerHTML=tot>0?`<i style="width:${A.c/tot*100}%;background:var(--summer)"></i><i style="width:${A.w/tot*100}%;background:var(--winter)"></i>`:'';
-
   const B=barsData(), max=Math.max(0,...B.map(b=>b.c+b.w+b.n));
-  $('bars').innerHTML=B.map(b=>{const h=v=>max?v/max*100:0;return `<div class="b" title="${b.t}: ${kwh(b.c+b.w+b.n)}, ${eur.format(b.cost/100)}"><i style="height:${h(b.c)}%;background:var(--summer)"></i><i style="height:${h(b.w)}%;background:var(--winter)"></i><i style="height:${h(b.n)}%;background:var(--grid)"></i></div>`;}).join('');
+  $('bars').innerHTML=B.map(b=>{const h=v=>max?v/max*100:0;return `<div class="b" title="${b.t}: ${kwh(b.c+b.w+b.n)}, ${eur.format(b.total/100)}"><i style="height:${h(b.c)}%;background:var(--summer)"></i><i style="height:${h(b.w)}%;background:var(--winter)"></i><i style="height:${h(b.n)}%;background:var(--grid)"></i></div>`;}).join('');
   $('barsX').innerHTML=S.period==='month'?`<span>1.</span><span>${Math.ceil(B.length/2)}.</span><span>${B.length}.</span>`:B.map(b=>`<span>${b.lbl}</span>`).join('');
 
   /* Erweiterte Details */
@@ -857,21 +1078,29 @@ function render(){
   const rows=[{id:'summer',name:'Sommersonne',wh:A.c,cost:A.cc},{id:'winter',name:'Wintersonne',wh:A.w,cost:A.cw},{id:'normal',name:'Normaltarif',wh:A.n,cost:A.cn}]
     .filter(r=>r.id!=='winter'||hasWinter()||r.wh>0);
   const color={summer:'var(--summer)',winter:'var(--winter)',normal:'var(--grid)'};
-  const lad=n=>`${n} ${n===1?'Ladung':'Ladungen'}`;
   const saved=hasNormal()?tot/1000*st.normal-A.cost:0;
-  $('moreBody').innerHTML=rows.map(r=>`<div class="tar"><div class="name"><span class="dot" style="background:${color[r.id]}"></span>${r.name}</div><div class="cost num">${eur.format(r.cost/100)}</div><div class="meta num">${lad(cnt[r.id])}, ${kwh(r.wh)}${r.wh>0?`, im Schnitt ${n2.format(r.cost/(r.wh/1000))} ct/kWh`:''}</div></div>`).join('')
-    +`<div class="tar sum"><div class="name">Gesamt</div><div class="cost num">${eur.format(A.cost/100)}</div><div class="meta num">${lad(ses.length)}, ${kwh(tot)}${saved>0?`, ${eur.format(saved/100)} gespart gegenüber reinem Normaltarif`:''}</div></div>`
-    +`<div class="foot">Eine Ladung, die über einen Tarifwechsel läuft, zählt bei beiden Tarifen. Deshalb kann die Summe der Ladungen je Tarif größer sein als die Gesamtzahl.</div>`;
+  const per100=isNum(S.car.cons)&&S.car.cons>0&&tot>0?A.total/(tot/1000)*S.car.cons/(1-(isNum(S.car.loss)?S.car.loss:10)/100)/100:null;
+  const inPer=S.cur&&String(dayKey(new Date(S.cur.start||Date.now()))).startsWith(periodPrefix())?[S.cur,...ses]:ses;
+  const pk=peaks(inPer), pkList=Object.entries(pk).sort((a,b)=>b[1].kw-a[1].kw), top=pkList[0];
+  const lpSum=Object.values(pk).reduce((a,v)=>a+(lpMonth(v.kw)||0),0);
+  let html=rows.map(r=>`<div class="tar"><div class="name"><span class="dot" style="background:${color[r.id]}"></span>${r.name}</div><div class="cost num">${eur.format(r.cost/100)}</div><div class="meta num">${lad(cnt[r.id])}, ${kwh(r.wh)}${r.wh>0?`, im Schnitt ${n2.format(r.cost/(r.wh/1000))} ct/kWh`:''}</div></div>`).join('');
+  if(S.netz.on) html+=`<div class="tar"><div class="name"><span class="dot" style="background:var(--muted)"></span>Netzkosten</div><div class="cost num">${eur.format(A.net/100)}</div><div class="meta num">${kwh(tot)}${tot>0?`, im Schnitt ${n2.format(A.net/(tot/1000))} ct/kWh`:''}</div></div>`;
+  html+=`<div class="tar sum"><div class="name">Gesamt</div><div class="cost num">${eur.format(A.total/100)}</div><div class="meta num">${[lad(ses.length),kwh(tot),saved>0?`${eur.format(saved/100)} beim Strom gespart gegenüber reinem Normaltarif`:'',per100!=null?`${eur.format(per100)} je 100 km`:''].filter(Boolean).join(', ')}</div></div>`;
+  if(top) html+=`<div class="peak"><div class="name">Höchste Ladespitze (15 Minuten)</div><div class="meta num">${n1.format(top[1].kw)} kW am ${new Date(top[1].at).toLocaleDateString('de-AT',{day:'numeric',month:'numeric'})} um ${hm(new Date(top[1].at))} Uhr${top[1].kw>10?' – über der 10-kW-Grenze des künftigen Leistungspreises':''}.${isNum(S.netz.lpLow)?` Mit dem Leistungspreis ab 2027 wären das für diesen Zeitraum etwa <strong>${eur.format(lpSum)}</strong> zusätzlich (Richtwert ${n2.format(S.netz.lpLow)} €/kW/Jahr).`:''} Gemessen wird künftig am Hauszähler, andere Geräte zählen dazu.</div></div>`;
+  html+=`<div class="foot">Eine Ladung, die über einen Tarifwechsel läuft, zählt bei beiden Tarifen. Deshalb kann die Summe der Ladungen je Tarif größer sein als die Gesamtzahl.</div>`;
+  $('moreBody').innerHTML=html;
 
   /* Ladevorgänge */
+  $('sesCount').textContent=ses.length?lad(ses.length):'';
   const shownSes=ses.slice(0,200);
   $('sessions').innerHTML=shownSes.length?shownSes.map(s=>{
     const a=new Date(s.start),b=new Date(s.end),sh=s.wh?shares(s.cheapWh||0,s.winWh||0,s.wh):'';
     const plug=s.plugIn&&!s.redo?`angesteckt ${hm(new Date(s.plugIn))}${new Date(s.plugIn).toDateString()!==a.toDateString()?` (${new Date(s.plugIn).toLocaleDateString('de-AT',{day:'numeric',month:'numeric'})})`:''}${s.plugOut?`, abgesteckt ${hm(new Date(s.plugOut))}`:''}`:'';
     const note=s.imported?'aus go-e Export':s.missed?'ohne App erfasst, Zeit geschätzt':s.est?'Zeit geschätzt':'';
     const parts=s.periods&&s.periods.length>1&&!s.est?`, in ${s.periods.length} Abschnitten`:'';
+    const soc=socPct(s.wh), net=netCostOf(s).cost;
     const date=a.toLocaleDateString('de-AT',S.period==='month'?{weekday:'short',day:'numeric',month:'numeric'}:{day:'numeric',month:'numeric',year:'2-digit'});
-    return `<li><div><div class="when">${date}, ${s.startApprox?'ca. ':''}${hm(a)}–${s.endApprox?'ca. ':''}${hm(b)}</div><div class="meta num">${[`${n2.format(s.wh/1000)} kWh in ${dur(s.chargeMs??(s.end-s.start))}${parts}`,sh,note].filter(Boolean).join(', ')}</div>${plug?`<div class="meta num">${plug}</div>`:''}</div><div class="cost num">${eur.format(s.cost/100)}</div></li>`;}).join('')
+    return `<li><div><div class="when">${date}, ${s.startApprox?'ca. ':''}${hm(a)}–${s.endApprox?'ca. ':''}${hm(b)}</div><div class="meta num">${[`${n2.format(s.wh/1000)} kWh in ${dur(s.chargeMs??(s.end-s.start))}${parts}`,soc!=null?`+${Math.round(soc)} %`:'',sh,note].filter(Boolean).join(', ')}</div>${plug?`<div class="meta num">${plug}</div>`:''}</div><div class="cost num">${eur.format((s.cost+net)/100)}</div></li>`;}).join('')
     +(ses.length>200?`<li class="empty">Die neuesten 200 von ${ses.length} Ladungen werden angezeigt. Alle findest du im CSV-Export.</li>`:'')
     :`<li class="empty">Abgeschlossene Ladungen erscheinen hier, sobald das Auto abgesteckt ist.</li>`;
 }
@@ -882,26 +1111,65 @@ function step(dir){if(S.period==='month')view.setMonth(view.getMonth()+dir);else
 $('prevP').onclick=()=>step(-1);
 $('nextP').onclick=()=>step(1);
 
-const dlg=$('settings');
-const FIELDS={fSerial:'serial',fToken:'token',fKey:'appKey',fNormal:'normal',fSPrice:'cheap',fSMFrom:'mFrom',fSMTo:'mTo',fSHFrom:'hFrom',fSHTo:'hTo',fWPrice:'wPrice',fWMFrom:'wMFrom',fWMTo:'wMTo',fWHFrom:'wHFrom',fWHTo:'wHTo'};
-const PRICE=['normal','cheap','wPrice'];
-function openSettings(){
-  for(const[id,k]of Object.entries(FIELDS)){const v=S.settings[k];$(id).value=PRICE.includes(k)?(isNum(v)?n2.format(v):''):(v??'');}
-  $('testOut').textContent='';dlg.showModal();
+const numIn=id=>{const v=parseFloat(String($(id).value).replace(/\s/g,'').replace(',','.'));return isNaN(v)?null:v;};
+const fmtIn=v=>isNum(v)?n2.format(v).replace(/,00$/,''):'';
+const FILL={}, SAVE={};
+function openDlg(id){const d=$(id); if(FILL[id]) FILL[id](); if($('menu').open) $('menu').close(); d.returnValue=''; d.showModal();}
+function openSettings(){openDlg('dlgWallbox');}
+for(const id of ['dlgWallbox','dlgTarif','dlgNetz','dlgCar']){const d=$(id); d.addEventListener('close',()=>{if(d.returnValue==='save'&&SAVE[id]){SAVE[id](); save(); render();}});}
+$('menuBtn').onclick=()=>{$('menu').returnValue='';$('menu').showModal();};
+$('menu').addEventListener('click',e=>{if(e.target===$('menu')) $('menu').close();});
+document.querySelectorAll('[data-open]').forEach(b=>b.onclick=()=>openDlg(b.dataset.open));
+
+/* Einstellungen */
+FILL.dlgWallbox=()=>{$('fSerial').value=S.settings.serial||'';$('fToken').value=S.settings.token||'';$('fKey').value=S.settings.appKey||'';$('testOut').textContent='';$('keyOut').textContent='';};
+SAVE.dlgWallbox=()=>{const old=S.settings.serial; S.settings={...S.settings,serial:$('fSerial').value.trim(),token:$('fToken').value.trim(),appKey:$('fKey').value.trim()};
+  if(old!==S.settings.serial){S.lastEto=null;S.lastTs=null;S.cur=null;} setTimeout(startPolling,0);};
+/* Stromtarif */
+const TF={fNormal:'normal',fSPrice:'cheap',fSMFrom:'mFrom',fSMTo:'mTo',fSHFrom:'hFrom',fSHTo:'hTo',fWPrice:'wPrice',fWMFrom:'wMFrom',fWMTo:'wMTo',fWHFrom:'wHFrom',fWHTo:'wHTo'};
+FILL.dlgTarif=()=>{for(const[id,k]of Object.entries(TF)){const v=S.settings[k];$(id).value=['normal','cheap','wPrice'].includes(k)?(isNum(v)?n2.format(v):''):(v??'');}};
+SAVE.dlgTarif=()=>{const n={...S.settings};for(const[id,k]of Object.entries(TF)){const v=numIn(id);n[k]=v===null?(k==='normal'||k==='wPrice'?null:DEF.settings[k]):v;}
+  S.settings=n; setTimeout(poll,0);};
+/* Netzkosten */
+function netBoxHtml(){
+  const now=Date.now(), r=netRate(now,true), p=r.p, f=S.netz.ust?'brutto':'netto';
+  const row=(l,v)=>`<tr><td>${l}</td><td>${n2.format(v)} ct</td></tr>`;
+  const ML=['Jänner','Februar','März','April','Mai','Juni','Juli','August','September','Oktober','November','Dezember'], sm=p.sommer?`${ML[p.sommer.monate[0]-1]} bis ${ML[p.sommer.monate[1]-1]}, ${p.sommer.stunden[0]}–${p.sommer.stunden[1]} Uhr`:'';
+  return `<table>${row(`Netznutzung${r.which==='sommer'?' (Sommer-Netztarif)':''}`,r.arb)}${row('Netzverlust',r.verlust)}${row('Erneuerbaren-Förderbeitrag',r.eag)}${row('Elektrizitätsabgabe',r.abgabe)}<tr class="sumrow"><td>Jetzt je kWh (${f})</td><td>${n2.format(r.sum)} ct</td></tr></table>`
+    +(p.sommer?`<div class="src">Sommer-Netztarif ${n2.format(p.sommer.preis*(S.netz.ust?1.2:1))} statt ${n2.format(p.arbeitspreis*(S.netz.ust?1.2:1))} ct (${sm}), nur mit Smart Meter.</div>`:'')
+    +`<div class="src">${NETZ.netzbereich}, ${NETZ.netzebene}. Quelle: ${NETZ.quelle}. Stand ${new Date(NETZ.stand).toLocaleDateString('de-AT')}.</div>`
+    +NETZ.perioden.filter(q=>q.status!=='amtlich'&&q.hinweis).map(q=>`<div class="warn">Ab ${new Date(q.ab).toLocaleDateString('de-AT')}: ${q.hinweis}</div>`).join('');
 }
-$('openSettings').onclick=openSettings;
-dlg.addEventListener('close',()=>{
-  if(dlg.returnValue!=='save') return;
-  const num=id=>{const v=parseFloat(String($(id).value).replace(/\s/g,'').replace(',','.'));return isNaN(v)?null:v;};
-  const old=S.settings.serial,n={...S.settings};
-  for(const[id,k]of Object.entries(FIELDS)){
-    if(k==='serial'||k==='token'||k==='appKey') n[k]=$(id).value.trim();
-    else{const v=num(id);n[k]=v===null?(k==='normal'||k==='wPrice'?null:DEF.settings[k]):v;}
-  }
-  S.settings=n;
-  if(old!==n.serial){S.lastEto=null;S.lastTs=null;S.cur=null;}
-  save();startPolling();
-});
+FILL.dlgNetz=()=>{$('fNetOn').checked=!!S.netz.on;$('fNetSmart').checked=!!S.netz.smart;$('fNetUst').checked=!!S.netz.ust;$('fLpLow').value=fmtIn(S.netz.lpLow);$('fLpHigh').value=fmtIn(S.netz.lpHigh);$('netBox').innerHTML=netBoxHtml();$('netOut').textContent='';};
+['fNetSmart','fNetUst'].forEach(id=>$(id).onchange=()=>{const o={...S.netz};S.netz={...o,smart:$('fNetSmart').checked,ust:$('fNetUst').checked};$('netBox').innerHTML=netBoxHtml();S.netz=o;});
+SAVE.dlgNetz=()=>{S.netz={...S.netz,on:$('fNetOn').checked,smart:$('fNetSmart').checked,ust:$('fNetUst').checked,lpLow:numIn('fLpLow'),lpHigh:numIn('fLpHigh')};netCache.clear();};
+$('netUpdate').onclick=async()=>{$('netOut').textContent='Prüfe …'; const r=await loadNetz(true);
+  $('netOut').textContent=!r.ok?'Die Netztarif-Tabelle konnte nicht geladen werden.':r.changed?'Neue Netztarife übernommen.':`Die Werte sind aktuell (Stand ${new Date(NETZ.stand).toLocaleDateString('de-AT')}).`; $('netBox').innerHTML=netBoxHtml();};
+/* Fahrzeug */
+FILL.dlgCar=()=>{$('fCarName').value=S.car.name||'';$('fCarCap').value=fmtIn(S.car.cap);$('fCarAc').value=fmtIn(S.car.ac);$('fCarCons').value=fmtIn(S.car.cons);$('fCarLoss').value=fmtIn(S.car.loss);};
+SAVE.dlgCar=()=>{S.car={name:$('fCarName').value.trim(),cap:numIn('fCarCap'),ac:numIn('fCarAc'),cons:numIn('fCarCons'),loss:numIn('fCarLoss')??10};};
+/* Ladeleistung */
+const ampKw=a=>a*230*3/1000;
+let ampSel=16;
+function ampShow(){
+  $('ampKw').textContent=`${n1.format(ampKw(ampSel))} kW`; $('ampA').textContent=`${ampSel} A auf 3 Phasen`;
+  $('ampRange').value=ampSel; document.querySelectorAll('[data-amp]').forEach(b=>b.classList.toggle('on',+b.dataset.amp===ampSel));
+  const kw=ampKw(ampSel), lp=lpMonth(kw), cap=carCap();
+  $('ampInfo').innerHTML=`${cap?`Volle Ladung (${n1.format(cap)} kWh) dauert damit etwa <strong>${short(cap/(1-(S.car.loss??10)/100)/kw*3600e3)}</strong>.<br>`:''}`
+    +(lp!=null?`Leistungspreis ab 2027 für eine Spitze von ${n1.format(kw)} kW: etwa <strong>${eur.format(lp)} pro Monat</strong>${kw>10?', davon ein Teil zum höheren Satz über 10 kW':''}. Andere Geräte im Haushalt kommen zur Spitze dazu.`:'')
+    +(live&&isNum(live.amp)?`<br>Derzeit an der Wallbox eingestellt: ${live.amp} A (${n1.format(ampKw(live.amp))} kW).`:'');
+}
+FILL.dlgPower=()=>{ampSel=live&&isNum(live.amp)?Math.max(6,Math.min(16,live.amp)):16; $('ampOut').textContent=''; ampShow();};
+$('ampRange').oninput=e=>{ampSel=+e.target.value;ampShow();};
+document.querySelectorAll('[data-amp]').forEach(b=>b.onclick=()=>{ampSel=+b.dataset.amp;ampShow();});
+$('ampApply').onclick=async()=>{
+  if(!live){$('ampOut').textContent='Die Wallbox ist gerade nicht verbunden.';return;}
+  $('ampOut').textContent='Sende …';
+  try{await setKeys({amp:ampSel}); live.amp=ampSel; $('ampOut').textContent=`Gespeichert: Die Wallbox lädt jetzt mit höchstens ${n1.format(ampKw(ampSel))} kW.`; ampShow(); render(); setTimeout(poll,1500);}
+  catch(e){$('ampOut').textContent=e.message;}
+};
+$('powerRow').onclick=()=>openDlg('dlgPower');
+
 $('keyGen').onclick=()=>{
   const a=new Uint8Array(24); crypto.getRandomValues(a);
   $('fKey').value=Array.from(a,b=>'abcdefghijkmnopqrstuvwxyzABCDEFGHJKLMNPQRSTUVWXYZ23456789'[b%57]).join('');
@@ -922,18 +1190,22 @@ $('testBtn').onclick=async()=>{
   try{const d=await fetchStatus($('fSerial').value,$('fToken').value);$('testOut').textContent=`Verbunden. Zählerstand ${n1.format(d.eto/1000)} kWh, Status: ${CAR[d.car]??d.car}.`;}
   catch(e){$('testOut').textContent=e.message;}
 };
-$('resetBtn').onclick=()=>{if(confirm('Alle aufgezeichneten Ladungen löschen? Die Einstellungen bleiben erhalten.')){S={...clone(DEF),settings:S.settings,plan:S.plan,v:2,archive:{}};save();dlg.close();startPolling();}};
-$('refresh').onclick=poll;
+$('resetBtn').onclick=()=>{if(confirm('Alle aufgezeichneten Ladungen löschen? Die Einstellungen bleiben erhalten.')){S={...clone(DEF),settings:S.settings,netz:S.netz,car:S.car,netzTable:S.netzTable,plan:S.plan,v:2,archive:{}};save();$('dlgWallbox').close();startPolling();}};
+$('refresh').onclick=()=>{$('menu').close();poll();};
 $('exportCsv').onclick=()=>{
+  $('menu').close();
   const t=v=>v?new Date(v).toLocaleString('de-AT'):'';
-  const rows=[['Ladebeginn','Ladeende','Ladedauer','kWh','davon Sommersonne kWh','davon Wintersonne kWh','davon Normaltarif kWh','Kosten EUR','Zeit ungefähr','Aufteilung geschätzt','angesteckt','abgesteckt','Quelle']];
-  for(const s of [...S.sessions].reverse()){const nw=Math.max(0,s.wh-(s.cheapWh||0)-(s.winWh||0));rows.push([t(s.start),t(s.end),dur(s.chargeMs??(s.end-s.start)),n2.format(s.wh/1000),n2.format((s.cheapWh||0)/1000),n2.format((s.winWh||0)/1000),n2.format(nw/1000),n2.format(s.cost/100),s.startApprox||s.endApprox?'ja':'nein',s.est?'ja':'nein',t(s.plugIn),t(s.plugOut),s.imported?'go-e Export':s.missed?'ohne App erfasst':'App']);}
+  const rows=[['Ladebeginn','Ladeende','Ladedauer','kWh','davon Sommersonne kWh','davon Wintersonne kWh','davon Normaltarif kWh','Stromkosten EUR','Netzkosten EUR','Gesamt EUR','nachgeladen %','Zeit ungefähr','Aufteilung geschätzt','angesteckt','abgesteckt','Quelle']];
+  for(const s of [...S.sessions].reverse()){const nw=Math.max(0,s.wh-(s.cheapWh||0)-(s.winWh||0)), net=netCostOf(s).cost, soc=socPct(s.wh);
+    rows.push([t(s.start),t(s.end),dur(s.chargeMs??(s.end-s.start)),n2.format(s.wh/1000),n2.format((s.cheapWh||0)/1000),n2.format((s.winWh||0)/1000),n2.format(nw/1000),n2.format(s.cost/100),n2.format(net/100),n2.format((s.cost+net)/100),soc!=null?n1.format(soc):'',s.startApprox||s.endApprox?'ja':'nein',s.est?'ja':'nein',t(s.plugIn),t(s.plugOut),s.imported?'go-e Export':s.missed?'ohne App erfasst':'App']);}
   const csv='\ufeff'+rows.map(r=>r.map(x=>`"${x}"`).join(';')).join('\n');
   const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv'}));a.download='ladevorgaenge.csv';a.click();
 };
 
 setInterval(render,30000);
+loadNetz(false);
 startPolling();
+
 </script>
 </body>
 </html>

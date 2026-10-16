@@ -1,0 +1,30 @@
+{
+  "netzbereich": "Oberösterreich (Netz Oberösterreich GmbH)",
+  "netzebene": "Netzebene 7, Haushalt ohne Leistungsmessung",
+  "stand": "2026-10-16",
+  "quelle": "SNE-V 2018 – Novelle 2026 der E-Control, Preisblatt Netz OÖ ab 01.01.2026",
+  "perioden": [
+    {
+      "ab": "2026-01-01",
+      "status": "amtlich",
+      "arbeitspreis": 6.29,
+      "sommer": { "preis": 5.03, "monate": [4, 9], "stunden": [10, 16], "nurSmartMeter": true },
+      "verlust": 0.528,
+      "eag": 0.62,
+      "abgabe": 0.10
+    },
+    {
+      "ab": "2027-01-01",
+      "status": "vorläufig",
+      "hinweis": "Die Netzentgelte 2027 legt die E-Control erst mit der Tarifverordnung fest. Bis dahin gelten hier die Werte von 2026. Die Elektrizitätsabgabe ist nur 2026 auf 0,1 ct gesenkt, regulär beträgt sie 1,5 ct.",
+      "arbeitspreis": 6.29,
+      "sommer": { "preis": 5.03, "monate": [4, 9], "stunden": [10, 16], "nurSmartMeter": true },
+      "winter": { "preis": null, "monate": [10, 3], "stunden": [23, 5], "ab": "2027-10-01", "nurSmartMeter": true },
+      "verlust": 0.528,
+      "eag": 0.62,
+      "abgabe": 1.50,
+      "leistungspreis": { "bis10": 19, "ueber10": 38, "einheit": "€/kW/Jahr", "start": null,
+        "hinweis": "Richtwert der E-Control für den Start rund 19 €/kW/Jahr, je Netzbereich etwa 15–26 €. Über 10 kW gilt ein höherer Satz. Netz OÖ führt den Leistungspreis zwischen 1.1.2027 und 1.7.2028 ein." }
+    }
+  ]
+}
